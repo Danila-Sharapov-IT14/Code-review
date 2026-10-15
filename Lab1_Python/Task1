@@ -1,0 +1,72 @@
+# Во всех заданиях данной подгруппы предполагается, что исходные строки,
+# определяющие выражения, не содержат пробелов
+# При выполнении заданий не следует использовать оператор цикла
+# Вывести значение целочисленного выражения, заданного в виде строки S
+# Выражение определяется следующим образом:
+# <выражение> ::= <терм> | <выражение> + <терм> | <выражение> − <терм>
+# <терм> ::= <цифра> | <терм> * <цифра>
+
+# Импортирован модуль sys целиком вместо импорта отдельной функции
+import sys
+
+# Введена константа в верхнем регистре для лимита рекурсии
+RECURSION_LIMIT = 10000
+
+# Глобальная переменная s заменена на параметр функции,
+# состояние передаётся явно
+# Имя s заменено на expression_text — однобуквенные имена убраны
+
+
+def parse_num(text: str, index: int, acc: int = 0) -> tuple[int, int]:
+    # Имя s заменено на text
+    # Добавлены аннотации типов
+    if index >= len(text) or not text[index].isdigit():
+        return acc, index
+    return parse_num(text, index + 1, acc * 10 + int(text[index]))
+
+
+def parse_term(text: str, index: int) -> tuple[int, int]:
+    # Добавлены аннотации типов, имя s заменено на text
+    value, index = parse_num(text, index)
+    if index < len(text) and text[index] == '*':
+        sub_value, new_index = parse_term(text, index + 1)
+        return value * sub_value, new_index
+    return value, index
+
+
+def parse_expression_acc(text: str, index: int,
+                         current_value: int) -> tuple[int, int]:
+    # Длинная строка перенесена через скобки
+    # cur_val переименовано в current_value
+    # Добавлены аннотации типов
+    if index >= len(text) or text[index] not in '+-':
+        return current_value, index
+    operator = text[index]
+    next_term, new_index = parse_term(text, index + 1)
+    if operator == '+':
+        new_value = current_value + next_term
+    else:
+        new_value = current_value - next_term
+    return parse_expression_acc(text, new_index, new_value)
+
+
+def parse_expression(text: str, index: int) -> tuple[int, int]:
+    # Добавлены аннотации типов, имя s заменено на text
+    term, index = parse_term(text, index)
+    return parse_expression_acc(text, index, term)
+
+
+def main() -> None:
+    # Исполняемый код вынесен в функцию main
+    # Длинный вызов input перенесён через скобки
+    expression_text = input(
+        'введите выражение:'
+    )
+    result, _ = parse_expression(expression_text, 0)
+    print(result)
+
+
+if __name__ == '__main__':
+    # Лимит рекурсии задан через константу
+    sys.setrecursionlimit(RECURSION_LIMIT)
+    main()
