@@ -1,0 +1,92 @@
+"""
+Дана строка S0, целое число N (≤ 4) и N файлов целых чисел с именами S1, …, SN
+Объединить их содержимое в новом файле-архиве с именем S0,
+последовательно записывая в него следующие данные:
+размер (число элементов) первого исходного файла и все элементы этого файла,
+размер второго исходного файла и все его элементы, …, размер N-го исходного
+файла и все его элементы
+"""
+
+import random
+import struct
+
+# Введены константы в верхнем регистре для границ генерации и размера int
+MIN_ELEMENTS = 1
+MAX_ELEMENTS = 20
+MIN_VALUE = 1
+MAX_VALUE = 100
+INT_SIZE = 4
+MAX_FILES = 4
+
+
+def create_file(file_path: str) -> None:
+    # Добавлены аннотации типов
+    # Имя file заменено на file_path — понятнее, что это путь
+    # Убран закомментированный код
+    with open(file_path, "wb") as f:
+        for _ in range(random.randint(MIN_ELEMENTS, MAX_ELEMENTS)):
+            f.write(struct.pack('i', random.randint(MIN_VALUE, MAX_VALUE)))
+
+
+def create_archive(archive_path: str, files: list[str]) -> None:
+    # Логика формирования архива вынесена в отдельную функцию
+    # Добавлены аннотации типов
+    # Убран длинный комментарий в конце строки open
+    with open(archive_path, "wb") as archive:
+        for file_path in files:
+            with open(file_path, "rb") as source:
+                data = source.read()
+                size = len(data) // INT_SIZE
+                archive.write(struct.pack("i", size))
+                archive.write(data)
+
+
+def read_archive(archive_path: str) -> tuple[int, tuple[int, ...]]:
+    # Проверка вынесена в отдельную функцию
+    # Добавлены аннотации типов
+    with open(archive_path, 'rb') as file:
+        packed_data = file.read()
+        n = len(packed_data) // INT_SIZE
+        unpacked_data = struct.unpack('i' * n, packed_data)
+    return n, unpacked_data
+
+
+def input_file_name() -> str:
+    # Ввод имени файла вынесен в отдельную функцию
+    return input("Введите имя файла (без расширения): ")
+
+
+def input_files_count() -> int:
+    # Ввод количества файлов вынесен в отдельную функцию
+    # Добавлен комментарий о назначении проверки
+    while True:
+        n = int(input("Введите количество файлов: "))
+        if n > 0:
+            break
+        print("Число должно быть натуральным!\n")
+    return n
+
+
+def main() -> None:
+    # Исполняемый код вынесен в функцию main
+    file_name = input_file_name()
+    n = input_files_count()
+
+    files = []
+    for i in range(1, n + 1):
+        file_path = file_name + str(i) + ".bin"
+        create_file(file_path)
+        files.append(file_path)
+
+    print(files)
+
+    archive_path = file_name + "0"
+    create_archive(archive_path, files)
+
+    n_elements, unpacked_data = read_archive(archive_path)
+    print(n_elements)
+    print("Распакованные данные:", unpacked_data)
+
+
+if __name__ == '__main__':
+    main()
