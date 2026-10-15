@@ -1,0 +1,66 @@
+"""Дан файл целых чисел с элементами A1, A2, …, AN (N — количество элементов
+в файле). Заменить исходное расположение его элементов на следующее:
+A1, AN, A2, AN−1, A3, …"""
+
+import struct
+
+# Введены константы в верхнем регистре для имён файлов и размера int
+INPUT_FILENAME = "input.bin"
+OUTPUT_FILENAME = "output.bin"
+INT_SIZE = 4
+
+# Добавлены константы для примера входных данных
+SAMPLE_NUMBERS = [1, 2, 3, 4, 5, 6]
+
+
+def rearrange_file(input_filename: str,
+                   output_filename: str) -> tuple[list[int], list[int]]:
+    # Добавлены аннотации типов
+    # Имена input_filename и output_filename оставлены осмысленными
+    with open(input_filename, 'rb') as infile:
+        numbers = []
+        while True:
+            try:
+                number = struct.unpack('i', infile.read(INT_SIZE))[0]
+                numbers.append(number)
+            except struct.error:
+                # Прекращаем чтение, если достигнут конец файла
+                break
+
+    n = len(numbers)
+    rearranged_numbers = []
+    for i in range((n + 1) // 2):
+        rearranged_numbers.append(numbers[i])
+        if n - 1 - i > i:
+            rearranged_numbers.append(numbers[n - 1 - i])
+
+    with open(output_filename, 'wb') as outfile:
+        for number in rearranged_numbers:
+            outfile.write(struct.pack('i', number))
+
+    return numbers, rearranged_numbers
+
+
+def create_sample_file(filename: str, numbers: list[int]) -> None:
+    # Создание примера входного файла вынесено в отдельную функцию
+    # Добавлены аннотации типов
+    with open(filename, 'wb') as f:
+        for number in numbers:
+            f.write(struct.pack('i', number))
+
+
+def main() -> None:
+    # Исполняемый код вынесен в функцию main
+    # Убраны лишние пустые строки
+    create_sample_file(INPUT_FILENAME, SAMPLE_NUMBERS)
+
+    input_data, output_data = rearrange_file(
+        INPUT_FILENAME, OUTPUT_FILENAME
+    )
+
+    print("Входные данные:", input_data)
+    print("Выходные данные:", output_data)
+
+
+if __name__ == '__main__':
+    main()
