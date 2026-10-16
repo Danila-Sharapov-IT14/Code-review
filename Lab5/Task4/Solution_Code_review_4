@@ -1,0 +1,112 @@
+"""
+Определение высоты элементов генеалогического дерева
+
+Каждому человеку указан один родитель, кроме родоначальника
+Высота родоначальника — 0, у каждого потомка — на 1 больше
+Программа вычисляет высоты всех элементов и выводит их
+по алфавиту
+"""
+
+# Константы сообщений
+PROMPT_COUNT = "Введите количество человек: "
+PROMPT_PAIR = "{index} пара: "
+HEADER = '"Высота" каждого члена семьи: '
+LINE_TEMPLATE = "{name} {height}"
+
+
+def read_tree(count: int) -> dict[str, str]:
+    """
+    Запрашивает пары «потомок — родитель»
+
+    :param count: количество человек в дереве
+    :return: словарь вида {потомок: родитель}
+    """
+    parent: dict[str, str] = {}
+    for i in range(count - 1):
+        line = input(PROMPT_PAIR.format(index=i + 1)).split()
+        child, par = line[0], line[1]
+        parent[child] = par
+    return parent
+
+
+def find_root(parent: dict[str, str]) -> str | None:
+    """
+    Находит родоначальника — того, кто не является чьим-то потомком
+
+    :param parent: словарь потомков и родителей
+    :return: имя корня или None, если дерево пустое
+    """
+    children = set(parent.keys())
+    for par in parent.values():
+        if par not in children:
+            return par
+    return None
+
+
+def calc_height(
+    name: str,
+    parent: dict[str, str],
+    heights: dict[str, int],
+) -> int:
+    """
+    Рекурсивно вычисляет высоту элемента
+
+    :param name: имя человека
+    :param parent: словарь потомков и родителей
+    :param heights: кэш высот
+    :return: высота элемента
+    """
+    if name in heights:
+        return heights[name]
+
+    if name not in parent:
+        heights[name] = 0
+        return 0
+
+    value = calc_height(parent[name], parent, heights) + 1
+    heights[name] = value
+    return value
+
+
+def calc_all_heights(
+    parent: dict[str, str], root: str | None
+) -> dict[str, int]:
+    """
+    Вычисляет высоты всех элементов дерева
+
+    :param parent: словарь потомков и родителей
+    :param root: имя корня (или None для пустого дерева)
+    :return: словарь вида {имя: высота}
+    """
+    heights: dict[str, int] = {}
+    if root is not None:
+        calc_height(root, parent, heights)
+
+    for name in parent:
+        calc_height(name, parent, heights)
+
+    return heights
+
+
+def print_heights(heights: dict[str, int]) -> None:
+    """
+    Выводит высоты по алфавиту
+
+    :param heights: словарь вида {имя: высота}
+    """
+    print(HEADER)
+    for name in sorted(heights):
+        print(LINE_TEMPLATE.format(name=name, height=heights[name]))
+
+
+def main() -> None:
+    """Точка входа: ввод дерева, подсчёт и вывод высот"""
+    count = int(input(PROMPT_COUNT))
+    parent = read_tree(count)
+    root = find_root(parent)
+    heights = calc_all_heights(parent, root)
+    print_heights(heights)
+
+
+if __name__ == '__main__':
+    main()
