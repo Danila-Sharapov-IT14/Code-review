@@ -1,0 +1,109 @@
+"""
+Дано число K (> 0) и ссылки A1 и A2 на первый и последний элементы
+непустого двусвязного списка. Осуществить циклический сдвиг элементов
+списка на K позиций назад (т. е. в направлении от конца к началу списка)
+и вывести ссылки на первый и последний элементы полученного списка
+Для выполнения циклического сдвига преобразовать исходный список
+в циклический (см. задание Dynamic55), после чего «разорвать» его
+в позиции, соответствующей данному значению K
+Новые объекты типа Node не создавать
+
+Dynamic55. Дан первый элемент A1 непустого двусвязного списка
+Преобразовать список в циклический, записав в свойство Next последнего
+элемента списка ссылку на его первый элемент, а в свойство Prev первого
+элемента — ссылку на последний элемент. Вывести ссылку на элемент,
+который был последним элементом исходного списка
+"""
+
+
+class Node:
+    # Добавлены аннотации типов
+    # Имена next и prev заменены на next_node и prev_node —
+    # next перекрывает встроенную функцию
+    def __init__(self, data: int | None = None,
+                 next_node: 'Node | None' = None,
+                 prev_node: 'Node | None' = None) -> None:
+        self.data = data
+        self.next = next_node
+        self.prev = prev_node
+
+    def __str__(self) -> str:
+        # Добавлен __str__ для читаемого вывода ссылок на узлы
+        return str(self.data)
+
+
+class DoublyLinkedList:
+    # Добавлены аннотации типов
+    def __init__(self) -> None:
+        self.head = None
+        self.tail = None
+
+    def insert_at_begin(self, data: int) -> None:
+        # Имя insertAtBegin заменено на insert_at_begin — snake_case
+        # Комментарий убран из конца строки
+        # Добавлены аннотации типов
+        new_node = Node(data)
+        if self.head is None:
+            self.head = new_node
+            self.tail = new_node
+        else:
+            new_node.next = self.head
+            self.head.prev = new_node
+            self.head = new_node
+
+    def make_circular(self) -> 'Node | None':
+        # Добавлены аннотации типов
+        if self.head is None:
+            return None
+        self.tail.next = self.head
+        self.head.prev = self.tail
+        return self.tail
+
+    def cyclic_shift(self, k: int) -> tuple['Node | None', 'Node | None']:
+        # Добавлены аннотации типов
+        # Убран вызов make_circular без использования результата
+        if self.head is None or self.head.next is None:
+            return self.head, self.tail
+
+        self.make_circular()
+
+        for _ in range(k):
+            self.head = self.head.prev
+            self.tail = self.tail.prev
+        self.tail.next = None
+        self.head.prev = None
+        return self.head, self.tail
+
+    def print_list(self) -> None:
+        # Добавлены аннотации типов
+        current = self.head
+        while current:
+            print(current.data)
+            current = current.next
+
+
+def main() -> None:
+    # Исполняемый код вынесен в функцию main
+    # Имя listi заменено на linked_list — убран транслит
+    linked_list = DoublyLinkedList()
+    linked_list.insert_at_begin(1)
+    linked_list.insert_at_begin(2)
+    linked_list.insert_at_begin(3)
+    linked_list.insert_at_begin(4)
+    linked_list.insert_at_begin(5)
+
+    print("Исходный список:")
+    linked_list.print_list()
+
+    k = int(input('Введите число K (> 0): '))
+
+    new_head, new_tail = linked_list.cyclic_shift(k)
+
+    print(f"Список после циклического сдвига на {k} позиций:")
+    linked_list.print_list()
+    print("Первый элемент:", new_head)
+    print("Последний элемент:", new_tail)
+
+
+if __name__ == '__main__':
+    main()
