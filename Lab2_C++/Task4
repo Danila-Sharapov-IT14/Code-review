@@ -1,13 +1,14 @@
-/* Дан двусвязный линейный список и указатель первый элемент этого
-списка. Все элементы списка хранят различные между собой значения. Необходимо
-вывести значения элементов списка, которые находятся между наименьшим и
-наибольшим элементами списка, в том порядке, в каком они находятся в исходном
-списке. Использовать процедуры.
-
+/*
+Дан циклический двусвязный линейный список и указатель первый
+элемент этого списка. Необходимо удалить в списке все элементы, у которых правый и
+левый сосед совпадают. Если таких элементов нет, то оставить список без изменений.
+Первый и последний элементы считать соседями. В результате вернуть ссылку на
+последний элемент полученного списка.
 Все динамические структуры данных реализовывать через классы. Не использовать STL.
-Для каждой динамической структуры должен быть предусмотрен
-стандартный набор методов - добавления/удаления/вывода элементов.
-Во всех задачах обязательно наличие дружественного интерфейса. Ввод данных с клавиатуры. */
+Для каждой динамической структуры должен быть предусмотрен стандартный
+набор методов - добавления/удаления/вывода элементов. Во всех задачах обязательно наличие
+дружественного интерфейса. Ввод данных с клавиатуры.
+*/
 
 #include <iostream>
 
@@ -19,21 +20,21 @@ class Node {
 // Приватные поля с подчёркиванием в конце
 private:
     int data_;
-    Node* prev_;
     Node* next_;
+    Node* prev_;
 
 // Сначала public, затем private
 public:
     // Открывающая скобка на той же строке
-    Node(int value) : data_(value), prev_(nullptr), next_(nullptr) {}
+    Node(int value) : data_(value), next_(nullptr), prev_(nullptr) {}
 
     // Дружественный интерфейс
-    friend class LinkedList;
+    friend class DoubleList;
 };
 
 // Класс в PascalCase
 // Открывающая скобка на той же строке
-class LinkedList {
+class DoubleList {
 // Приватные поля с подчёркиванием в конце
 private:
     Node* head_;
@@ -41,174 +42,188 @@ private:
 // Сначала public, затем private
 public:
     // Открывающая скобка на той же строке
-    LinkedList() : head_(nullptr) {}
+    DoubleList() : head_(nullptr) {}
 
-    // Метод в PascalCase
     // Открывающая скобка на той же строке
-    void Add(int value) {
-        Node* newNode = new Node(value);
+    ~DoubleList() {
         // Пробелы вокруг операторов
-        if (head_ == nullptr) {
-            head_ = newNode;
+        if (!head_) {
+            return;
         }
-        // Открывающая скобка на той же строке
-        else {
-            Node* current = head_;
-            // Пробелы вокруг операторов
-            while (current->next_ != nullptr) {
-                current = current->next_;
-            }
-            current->next_ = newNode;
-            newNode->prev_ = current;
-        }
-    }
-
-    // Метод в PascalCase
-    // Открывающая скобка на той же строке
-    void Clear() {
         Node* current = head_;
-        // Пробелы вокруг операторов
-        while (current != nullptr) {
+        // Открывающая скобка на той же строке
+        while (true) {
             Node* temp = current;
             current = current->next_;
             delete temp;
+            // Пробелы вокруг операторов
+            if (current == head_) {
+                break;
+            }
         }
-        head_ = nullptr;
     }
 
     // Метод в PascalCase
     // Открывающая скобка на той же строке
-    void Print() {
-        Node* current = head_;
+    void PushBack(int value) {
+        Node* newNode = new Node(value);
         // Пробелы вокруг операторов
-        while (current != nullptr) {
+        if (!head_) {
+            head_ = newNode;
+            newNode->next_ = newNode;
+            newNode->prev_ = newNode;
+        }
+        // Открывающая скобка на той же строке
+        else {
+            Node* tail = head_->prev_;
+            tail->next_ = newNode;
+            newNode->prev_ = tail;
+            newNode->next_ = head_;
+            head_->prev_ = newNode;
+        }
+    }
+
+    // Метод в PascalCase
+    // Открывающая скобка на той же строке
+    void PrintList() {
+        Node* current = head_;
+        // Открывающая скобка на той же строке
+        while (true) {
             cout << current->data_ << " ";
             current = current->next_;
+            // Пробелы вокруг операторов
+            if (current == head_) {
+                break;
+            }
         }
         cout << endl;
     }
 
     // Метод в PascalCase
     // Открывающая скобка на той же строке
-    void FindMinMax(Node*& minNode, Node*& maxNode) {
+    Node* DeleteNode(Node* node) {
         // Пробелы вокруг операторов
-        if (head_ == nullptr) {
-            return;
+        if (!node) {
+            return nullptr;
         }
-
-        minNode = maxNode = head_;
-        Node* current = head_->next_;
-
         // Пробелы вокруг операторов
-        while (current != nullptr) {
+        if (node->next_ == node && node->prev_ == node) {
             // Пробелы вокруг операторов
-            if (current->data_ < minNode->data_) {
-                minNode = current;
+            if (node == head_) {
+                head_ = nullptr;
             }
-            // Пробелы вокруг операторов
-            if (current->data_ > maxNode->data_) {
-                maxNode = current;
-            }
-            current = current->next_;
+            delete node;
+            return nullptr;
         }
+        Node* nextNode = node->next_;
+        node->prev_->next_ = node->next_;
+        node->next_->prev_ = node->prev_;
+        // Пробелы вокруг операторов
+        if (node == head_) {
+            head_ = nextNode;
+        }
+        delete node;
+        return nextNode;
     }
 
     // Метод в PascalCase
     // Открывающая скобка на той же строке
-    bool IsEarlier(Node* first, Node* second) {
-        Node* current = head_;
+    Node* RemoveSides() {
         // Пробелы вокруг операторов
-        while (current != nullptr) {
+        if (!head_) {
+            return nullptr;
+        }
+        bool anyDeletion = false;
+        bool deletedSomething = false;
+        // Открывающая скобка на той же строке
+        while (true) {
+            anyDeletion = false;
             // Пробелы вокруг операторов
-            if (current == first) {
-                return true;
+            if (!head_ || head_->next_ == head_) {
+                break;
+            }
+            Node* start = head_;
+            Node* current = head_;
+            bool completedCycle = false;
+            // Открывающая скобка на той же строке
+            while (!completedCycle) {
+                int leftData = current->prev_->data_;
+                int rightData = current->next_->data_;
+                // Пробелы вокруг операторов
+                if (leftData == rightData) {
+                    anyDeletion = true;
+                    deletedSomething = true;
+                    Node* nextNode = current->next_;
+                    // Пробелы вокруг операторов
+                    if (current == head_) {
+                        head_ = nextNode;
+                    }
+                    current = DeleteNode(current);
+                    // Пробелы вокруг операторов
+                    if (!current) {
+                        return nullptr;
+                    }
+                    start = head_;
+                    continue;
+                }
+                // Открывающая скобка на той же строке
+                else {
+                    current = current->next_;
+                }
+                // Пробелы вокруг операторов
+                if (current == start) {
+                    completedCycle = true;
+                }
             }
             // Пробелы вокруг операторов
-            if (current == second) {
-                return false;
+            if (!anyDeletion) {
+                break;
             }
-            current = current->next_;
         }
-        return false;
-    }
-
-    // Метод в PascalCase
-    // Открывающая скобка на той же строке
-    void PrintBetweenMinMax() {
-        Node* minNode = nullptr;
-        Node* maxNode = nullptr;
-        FindMinMax(minNode, maxNode);
-
         // Пробелы вокруг операторов
-        if (minNode == nullptr || maxNode == nullptr || minNode == maxNode) {
-            cout << "Нет элементов для вывода!" << endl;
-            return;
+        if (!head_) {
+            return nullptr;
         }
-
-        bool minFirst = IsEarlier(minNode, maxNode);
-        Node* start = minFirst ? minNode : maxNode;
-        Node* end = minFirst ? maxNode : minNode;
-
-        cout << "Элементы между " << minNode->data_ << " и " << maxNode->data_ << ": ";
-        Node* current = start->next_;
-        bool hasElements = false;
-
-        // Пробелы вокруг операторов
-        while (current != nullptr && current != end) {
-            cout << current->data_ << " ";
-            hasElements = true;
-            current = current->next_;
-        }
-
-        // Пробелы вокруг операторов
-        if (!hasElements) {
-            cout << "Отсутствуют";
-        }
-        cout << endl;
+        Node* tail = head_->prev_;
+        return tail;
     }
 
     // Дружественный интерфейс
-    friend void PrintBetweenMinMax(LinkedList& list);
+    friend void ProcessList(DoubleList& list);
 };
 
 // Функция в PascalCase
 // Открывающая скобка на той же строке
-void PrintBetweenMinMax(LinkedList& list) {
-    list.PrintBetweenMinMax();
+void ProcessList(DoubleList& list) {
+    list.PrintList();
 }
 
 // Открывающая скобка на той же строке
 int main() {
     setlocale(LC_ALL, "Russian");
     // Переменная в camelCase
-    LinkedList list;
-
-    cout << "Введите количество элементов: ";
-    int n;
+    DoubleList list;
+    int n, value;
+    cout << "сколько надо чисел: ";
     cin >> n;
-
-    // Пробелы вокруг операторов
-    if (n <= 0) {
-        cout << "Некорректное число!" << endl;
-        return 0;
-    }
-
-    cout << "Вводите элементы:" << endl;
+    cout << "вводи числа" << endl;
     // Открывающая скобка на той же строке
     for (int i = 0; i < n; i++) {
-        int value;
-        // Пробелы вокруг операторов
-        if (!(cin >> value)) {
-            cout << "Ошибка ввода!" << endl;
-            return 0;
-        }
-        list.Add(value);
+        cin >> value;
+        list.PushBack(value);
     }
-
-    cout << "Список: ";
-    list.Print();
-    PrintBetweenMinMax(list);
-    list.Clear();
-
+    cout << "нормальный список: ";
+    list.PrintList();
+    DoubleList::Node* tail = list.RemoveSides();
+    cout << "обработанный список: ";
+    list.PrintList();
+    // Пробелы вокруг операторов
+    if (tail != nullptr) {
+        cout << "последний элемент: " << tail->data_ << endl;
+    }
+    // Открывающая скобка на той же строке
+    else {
+        cout << "список пуст" << endl;
+    }
     return 0;
 }
