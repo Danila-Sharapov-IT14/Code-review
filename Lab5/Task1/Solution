@@ -1,0 +1,21 @@
+# программа определяет страну по городу
+
+K = int(input("Кол-во стран: "))
+
+data = {}
+for i in range(K):
+    line = input(str(i+1) + " страна: ").split()
+    country = line[0]
+    cities = line[1:]
+    data[country] = cities
+
+for j in range(3):
+    city = input(str(j+1) + " город: ")
+    found = False
+    for country in data:
+        if city in data[country]:
+            print("Город " + city + " расположен в стране " + country + ".")
+            found = True
+            break
+    if not found:
+        print("По городу " + city + " данных нет.")
