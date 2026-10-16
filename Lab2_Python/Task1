@@ -1,0 +1,109 @@
+# Дана вершина A1 стека (если стек пуст, то A1 = null)
+# Извлечь из стека все элементы и вывести их значения
+# Вывести также количество извлеченных элементов N
+# (для пустого стека вывести 0)
+# После извлечения элементов из стека освобождать ресурсы,
+# которые они использовали, вызывая для этих элементов метод Dispose
+
+import gc
+import random
+
+# Введены константы в верхнем регистре для границ генерации
+MIN_ELEMENTS = 0
+MAX_ELEMENTS = 20
+MIN_VALUE = 1
+MAX_VALUE = 100
+
+
+class Node:
+    # Добавлены аннотации типов
+    # Имя next заменено на next_node — next перекрывает встроенную функцию
+    def __init__(self, data: int | None = None,
+                 next_node: 'Node | None' = None) -> None:
+        self.data = data
+        self.next = next_node
+
+    def __str__(self) -> str:
+        return str(self.data)
+
+
+class LinkedList:
+    # Добавлены аннотации типов
+    def __init__(self) -> None:
+        self.head = None
+
+    def push(self, new_data: int) -> None:
+        new_node = Node(new_data)
+        new_node.next = self.head
+        self.head = new_node
+
+
+class Stack:
+    # Добавлены аннотации типов
+    def __init__(self) -> None:
+        self.head = None
+
+    def isempty(self) -> bool:
+        # Проверка == None заменена на is None
+        # Убрана избыточная конструкция if/else, возвращается выражение
+        return self.head is None
+
+    def push(self, data: int) -> None:
+        # Проверка == None заменена на is None
+        # Убрана избыточная ветка if/else, логика упрощена
+        new_node = Node(data)
+        new_node.next = self.head
+        self.head = new_node
+
+    def pop(self) -> int | None:
+        # Добавлены аннотации типов
+        # Имя poppednode заменено на popped_node
+        if self.isempty():
+            return None
+        popped_node = self.head
+        self.head = self.head.next
+        popped_node.next = None
+        return popped_node.data
+
+    def peek(self) -> int | None:
+        # Добавлены аннотации типов
+        if self.isempty():
+            return None
+        return self.head.data
+
+    def dispose(self) -> None:
+        # Добавлены аннотации типов
+        gc.collect()
+
+
+def fill_stack(stack: Stack) -> None:
+    # Заполнение стека вынесено в отдельную функцию
+    # Добавлены аннотации типов
+    for _ in range(random.randint(MIN_ELEMENTS, MAX_ELEMENTS)):
+        stack.push(random.randint(MIN_VALUE, MAX_VALUE))
+
+
+def extract_all(stack: Stack) -> int:
+    # Извлечение всех элементов вынесено в отдельную функцию
+    # Добавлены аннотации типов
+    count = 0
+    while not stack.isempty():
+        print(stack.pop())
+        count += 1
+    return count
+
+
+def main() -> None:
+    # Исполняемый код вынесен в функцию main
+    # Имя stek заменено на stack — транслит убран
+    stack = Stack()
+    fill_stack(stack)
+
+    count = extract_all(stack)
+    print(count)
+
+    stack.dispose()
+
+
+if __name__ == '__main__':
+    main()
