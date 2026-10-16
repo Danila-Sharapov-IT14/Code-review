@@ -1,0 +1,28 @@
+# игра угадайка
+
+N = int(input("Введите максимальное число: "))
+
+possible = set(range(1, N+1))
+
+while True:
+    line = input("Нужное число есть среди вот этих чисел: ")
+
+    if line == "Помогите!":
+        break
+
+    nums = set(map(int, line.split()))
+    answer = input("Ответ Ивана: ")
+
+    if answer == "Да":
+        possible &= nums
+    else:
+        possible -= nums
+
+    if len(possible) == 1:
+        break
+
+result = ""
+for x in sorted(possible):
+    result += str(x) + " "
+
+print("Иван мог загадать следующие числа: " + result.strip())
