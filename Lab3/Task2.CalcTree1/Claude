@@ -1,0 +1,112 @@
+"""
+Построение и преобразование дерева арифметического выражения
+из обратной польской записи
+
+Операции кодируются отрицательными числами:
+    + -> -1, - -> -2, * -> -3
+Операнды — целые числа от 0 до 9
+"""
+
+OPERATION_CODES = {
+    '+': -1,
+    '-': -2,
+    '*': -3,
+}
+
+SUBTRACTION_CODE = -2
+
+
+class Node:
+    """Узел дерева выражения"""
+
+    def __init__(self, data, left=None, right=None):
+        self.data = data
+        self.left = left
+        self.right = right
+
+    def is_leaf(self):
+        """Проверяет, является ли узел листом (операндом)"""
+        return self.data >= 0
+
+
+def build_tree(tokens):
+    """
+    Строит дерево выражения из списка токенов в обратной польской записи
+
+    :param tokens: список токенов (числа и знаки операций)
+    :return: корень построенного дерева
+    """
+    stack = []
+    for token in tokens:
+        if token in OPERATION_CODES:
+            right = stack.pop()
+            left = stack.pop()
+            node = Node(OPERATION_CODES[token], left, right)
+            stack.append(node)
+        else:
+            stack.append(Node(int(token)))
+    return stack[0]
+
+
+def evaluate(node):
+    """
+    Вычисляет значение поддерева
+
+    :param node: корень поддерева
+    :return: целочисленный результат вычисления
+    """
+    if node.is_leaf():
+        return node.data
+    left_value = evaluate(node.left)
+    right_value = evaluate(node.right)
+
+    if node.data == -1:
+        return left_value + right_value
+    if node.data == SUBTRACTION_CODE:
+        return left_value - right_value
+    return left_value * right_value
+
+
+def contains_subtraction(node):
+    """
+    Проверяет, содержит ли поддерево операцию вычитания
+
+    :param node: корень поддерева
+    :return: True, если вычитание есть, иначе False
+    """
+    if node is None:
+        return False
+    if node.data == SUBTRACTION_CODE:
+        return True
+    return (contains_subtraction(node.left)
+            or contains_subtraction(node.right))
+
+
+def remove_subtraction(node):
+    """
+    Заменяет поддеревья с вычитанием на их вычисленное значение
+
+    :param node: корень поддерева
+    :return: преобразованный корень
+    """
+    if node is None:
+        return None
+    if contains_subtraction(node):
+        return Node(evaluate(node))
+    node.left = remove_subtraction(node.left)
+    node.right = remove_subtraction(node.right)
+    return node
+
+
+def main():
+    """Точка входа: чтение файла, построение и преобразование дерева"""
+    with open('filename.txt', encoding='utf-8') as file:
+        tokens = file.read().split()
+
+    root = build_tree(tokens)
+    root = remove_subtraction(root)
+    print("Указатель на корень:", root)
+
+
+if __name__ == '__main__':
+    main()
