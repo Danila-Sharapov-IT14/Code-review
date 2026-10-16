@@ -1,8 +1,5 @@
-/*
-Дан указатель P1 на вершину непустого стека. Извлечь из стека первый (верхний)
-элемент и вывести его значение D, а также адрес P2 новой вершины стека. Если после
-извлечения элемента стек окажется пустым, то положить P2 = nullptr. После извлечения
-элемента из стека освободить память, занимаемую этим элементом.
+/* Дано число D и указатель P1 на вершину непустого стека.
+Добавить элемент со значением D в стек и вывести адрес P2 новой вершины стека.
 
 Для каждой динамической структуры должен быть предусмотрен стандартный набор методов -
 добавления/удаления/вывода элементов.
@@ -12,8 +9,7 @@
 узлов-записей типа TNode. Поле Next последнего элемента цепочки равно nullptr. Вершиной
 стека (top) считается первый элемент цепочки. Для доступа к стеку используется указатель на
 его вершину (для пустого стека данный указатель полагается равным nullptr). Значением
-элемента стека считается значение его поля Data
-*/
+элемента стека считается значение его поля Data */
 
 #include <iostream>
 
@@ -21,89 +17,144 @@ using namespace std;
 
 // Класс в PascalCase
 // Открывающая скобка на той же строке
-class Stack {
+class Node {
 // Приватные поля с подчёркиванием в конце
 private:
-    // Структура в PascalCase
-    struct Node {
-        int data_;
-        Node* next_;
-        // Открывающая скобка на той же строке
-        Node(int value) : data_(value), next_(nullptr) {}
-    };
-    Node* top_; // вершина
-    int count_;
+    int data_;
+    Node* next_;
+
 // Сначала public, затем private
 public:
     // Открывающая скобка на той же строке
-    Stack() : top_(nullptr), count_(0) {}
+    Node(int value) : data_(value), next_(nullptr) {}
+
+    // Дружественный интерфейс
+    friend class Stack;
+};
+
+// Класс в PascalCase
+// Открывающая скобка на той же строке
+class Stack {
+// Приватные поля с подчёркиванием в конце
+private:
+    Node* top_;
+
+// Сначала public, затем private
+public:
+    // Открывающая скобка на той же строке
+    Stack() : top_(nullptr) {}
 
     // Метод в PascalCase
     // Открывающая скобка на той же строке
-    void Add(int value) {
-        Node* newNode = new Node(value);
-        newNode->next_ = top_;
-        top_ = newNode;
-        count_++;
+    void Push(int value) {
+        Node* newNode = new Node(value); // Создаем новый узел
+        newNode->next_ = top_; // Новый узел указывает на текущую вершину
+        top_ = newNode; // Обновляем вершину стека
+        cout << "Элемент " << value << " добавлен в стек." << endl;
     }
 
     // Метод в PascalCase
     // Открывающая скобка на той же строке
-    void RemoveTop() {
-        // Проверка на пустой стек
+    void Pop() {
+        // Пробелы вокруг операторов
         if (top_ == nullptr) {
-            cout << "Стек пуст" << endl;
+            cout << "Стек пуст! Невозможно удалить элемент." << endl;
             return;
         }
         Node* temp = top_;
-        cout << "Первый элемент стека:" << endl;
-        cout << top_->data_ << endl;
-        // Пробелы вокруг операторов
-        if (top_->next_ == nullptr) {
-            top_ = nullptr;
-        }
-        // Открывающая скобка на той же строке
-        else {
-            top_ = top_->next_;
-        }
-        cout << "Адрес новой вершины после извлечения 1 элемента: " << top_ << endl; // Вывод адреса новой вершины
-        // Пробелы вокруг операторов
-        if (top_ != nullptr) {
-            cout << "Значение новой вершины: " << top_->data_ << endl; // Вывод значения новой вершины
-        }
+        top_ = top_->next_;
+        cout << "Элемент " << temp->data_ << " удален из стека." << endl;
         delete temp;
-        count_--;
     }
 
     // Метод в PascalCase
     // Открывающая скобка на той же строке
-    void Show() {
-        Node* temp = top_;
+    void Print() {
         // Пробелы вокруг операторов
-        while (temp != nullptr) {
-            cout << temp->data_ << endl;
-            temp = temp->next_;
+        if (top_ == nullptr) {
+            cout << "Стек пуст!" << endl;
+            return;
         }
+        Node* current = top_;
+        cout << "Элементы стека: ";
+        // Пробелы вокруг операторов
+        while (current != nullptr) {
+            cout << current->data_ << " ";
+            current = current->next_;
+        }
+        cout << endl;
     }
+
+    // Метод в PascalCase
+    // Открывающая скобка на той же строке
+    Node* GetTop() {
+        return top_;
+    }
+
+    // Метод в PascalCase
+    // Открывающая скобка на той же строке
+    void ClearStack() {
+        // Пробелы вокруг операторов
+        while (top_ != nullptr) {
+            Node* temp = top_;
+            top_ = top_->next_;
+            delete temp; // Удаляем узел
+        }
+        cout << "Стек очищен." << endl;
+    }
+
+    // Дружественный интерфейс
+    friend void AddElementAndPrintAddress(Stack& stack, int value);
 };
+
+// Функция в PascalCase
+// Открывающая скобка на той же строке
+void AddElementAndPrintAddress(Stack& stack, int value) {
+    stack.Push(value);
+    cout << "Адрес новой вершины стека: " << stack.GetTop() << endl;
+}
 
 // Открывающая скобка на той же строке
 int main() {
+    setlocale(LC_ALL, "Russian");
     // Переменная в camelCase
     Stack stack;
-    setlocale(LC_ALL, "RU");
-    cout << "Введите количество элементов стека" << endl;
-    int n;
-    cin >> n; // размер стека
+    int choice, value;
+
     // Открывающая скобка на той же строке
-    for (int i = 0; i < n; i++) {
-        int num;
-        cout << "Введите элемент стека" << endl;
-        cin >> num;
-        stack.Add(num);
+    while (true) {
+        cout << "\nМеню:\n";
+        cout << "1. Добавить элемент в стек\n";
+        cout << "2. Удалить элемент из стека\n";
+        cout << "3. Вывести элементы стека\n";
+        cout << "4. Очистить стек\n";
+        cout << "5. Выйти\n";
+        cout << "Введите ваш выбор: ";
+        cin >> choice;
+
+        switch (choice) {
+        // Открывающая скобка на той же строке
+        case 1:
+            cout << "Введите число для добавления в стек: ";
+            cin >> value;
+            AddElementAndPrintAddress(stack, value);
+            break;
+        case 2:
+            stack.Pop();
+            break;
+        case 3:
+            stack.Print();
+            break;
+        case 4:
+            stack.ClearStack();
+            break;
+        case 5:
+            cout << "Выход из программы." << endl;
+            return 0;
+        default:
+            cout << "Неверный выбор! Пожалуйста, попробуйте снова." << endl;
+        }
     }
-    cout << "Стек:" << endl;
-    stack.Show();
-    stack.RemoveTop();
+
     return 0;
 }
