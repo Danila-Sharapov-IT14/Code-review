@@ -1,0 +1,44 @@
+def read_graph(filename):
+    with open(filename) as f:
+        lines = f.read().splitlines()
+    n = int(lines[0])
+    matrix = []
+    for i in range(1, n + 1):
+        row = list(map(int, lines[i].split()))
+        matrix.append(row)
+    return n, matrix
+
+
+def find_all_paths(matrix, n, start, end):
+    paths = []
+    stack = [(start, [start])]
+    while stack:
+        current, path = stack.pop()
+        if current == end:
+            paths.append(path)
+            continue
+        for neighbor in range(n):
+            if matrix[current][neighbor] == 1 and neighbor not in path:
+                stack.append((neighbor, path + [neighbor]))
+    return paths
+
+
+def main():
+    n, matrix = read_graph('FileName1.txt')
+    k1 = int(input("Введите K1: ")) - 1
+    k2 = int(input("Введите K2: ")) - 1
+
+    paths = find_all_paths(matrix, n, k1, k2)
+
+    with open('FileName2.txt', 'w') as f:
+        if not paths:
+            f.write("-1\n")
+        else:
+            paths.sort(key=lambda p: (len(p), p))
+            f.write(f"{len(paths)}\n")
+            for path in paths:
+                f.write(" ".join(str(v + 1) for v in path) + "\n")
+
+
+if __name__ == '__main__':
+    main()
