@@ -1,0 +1,108 @@
+#Победитель — Claude.
+
+#Аргументация:
+#Корректность — гарантирует наличие символа каждого типа, что соответствует требованию «надёжные пароли должны состоять из сочетания строчных букв, прописных букв, цифр и символов».
+#У DeepSeek и GPT пароль может случайно не содержать, например, ни одной цифры.
+#Безопасность — использует модуль secrets, предназначенный для генерации паролей (в отличие от random, который не криптостойкий).
+#Читаемость — структура groups наглядно показывает, из чего состоит каждый уровень.
+#Валидация — есть обработка ошибок ввода.
+#Расширяемость — легко добавить новый уровень, просто добавив запись в LEVELS.
+
+
+import secrets
+import string
+
+# Введены константы в верхнем регистре для описания уровней
+# Каждый уровень содержит имя, длину и список групп символов
+LEVELS = {
+    1: {
+        "name": "Лёгкий",
+        "length": 8,
+        "groups": [string.ascii_lowercase],
+    },
+    2: {
+        "name": "Средний",
+        "length": 12,
+        "groups": [
+            string.ascii_lowercase,
+            string.ascii_uppercase,
+            string.digits,
+        ],
+    },
+    3: {
+        "name": "Сложный",
+        "length": 16,
+        "groups": [
+            string.ascii_lowercase,
+            string.ascii_uppercase,
+            string.digits,
+            string.punctuation,
+        ],
+    },
+}
+
+
+def generate_password(length: int, groups: list[str]) -> str:
+    """
+    Генерирует случайный пароль заданной длины
+
+    Гарантирует наличие хотя бы одного символа из каждой переданной
+    группы, после чего добивает пароль случайными символами из
+    объединённого алфавита и перемешивает результат
+
+    :param length: длина пароля
+    :param groups: список групп символов (строк), из которых
+        должен состоять пароль
+    :return: сгенерированный пароль
+    """
+    alphabet = ''.join(groups)
+
+    # Гарантируем по одному символу из каждой группы
+    password_chars = [secrets.choice(group) for group in groups]
+
+    # Добиваем пароль случайными символами до нужной длины
+    remaining = length - len(password_chars)
+    password_chars += [
+        secrets.choice(alphabet) for _ in range(remaining)
+    ]
+
+    # Перемешиваем, чтобы гарантированные символы не стояли в начале
+    secrets.SystemRandom().shuffle(password_chars)
+
+    return ''.join(password_chars)
+
+
+def choose_level() -> int:
+    """
+    Запрашивает у пользователя уровень сложности
+
+    Выводит список доступных уровней и запрашивает выбор
+    Повторяет ввод при некорректных данных
+
+    :return: номер выбранного уровня (1, 2 или 3)
+    """
+    print("Уровни сложности пароля:")
+    for key, info in LEVELS.items():
+        print(f"  {key}. {info['name']} — {info['length']} символов")
+
+    while True:
+        try:
+            level = int(input("Выберите уровень (1-3): "))
+            if level in LEVELS:
+                return level
+            print("Уровень должен быть от 1 до 3")
+        except ValueError:
+            print("Пожалуйста, введите число")
+
+
+def main() -> None:
+    """Точка входа: выбор уровня и генерация пароля"""
+    level = choose_level()
+    info = LEVELS[level]
+
+    password = generate_password(info["length"], info["groups"])
+    print(f"Пароль ({info['name']}): {password}")
+
+
+if __name__ == '__main__':
+    main()
