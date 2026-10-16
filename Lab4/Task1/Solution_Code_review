@@ -1,0 +1,205 @@
+"""
+Модель семьи: родители и их дети
+
+Родитель умеет сообщать о себе, успокаивать и кормить детей
+Ребёнок имеет состояния спокойствия и голода
+"""
+
+# Константы для действий с ребёнком
+ACTION_CALM = '1'
+ACTION_FEED = '2'
+
+# Константы пунктов меню
+MENU_PARENT_INFO = '1'
+MENU_CHILDREN_INFO = '2'
+MENU_CHILD_ACTION = '3'
+MENU_EXIT = '4'
+
+
+class Child:
+    """Ребёнок с именем, возрастом и состояниями"""
+
+    def __init__(self, name: str, age: int) -> None:
+        """
+        :param name: имя ребёнка
+        :param age: возраст ребёнка
+        """
+        self.name = name
+        self.age = age
+        self.is_calm = False
+        self.is_hungry = True
+
+    def __str__(self) -> str:
+        """Строковое представление состояния ребёнка"""
+        calm = "спокоен" if self.is_calm else "не спокоен"
+        hungry = "голоден" if self.is_hungry else "не голоден"
+        return f"{self.name} ({self.age} лет) — {calm}, {hungry}"
+
+    def calm_down(self) -> None:
+        """Успокаивает ребёнка"""
+        self.is_calm = True
+
+    def feed(self) -> None:
+        """Кормит ребёнка"""
+        self.is_hungry = False
+
+
+class Parent:
+    """Родитель с именем, возрастом и списком детей"""
+
+    def __init__(self, name: str, age: int) -> None:
+        """
+        :param name: имя родителя
+        :param age: возраст родителя
+        """
+        self.name = name
+        self.age = age
+        self.children: list[Child] = []
+
+    def add_child(self, child: Child) -> None:
+        """
+        Добавляет ребёнка в список детей
+
+        :param child: объект ребёнка
+        """
+        self.children.append(child)
+
+    def __str__(self) -> str:
+        """Строковое представление родителя"""
+        return (f"Родитель: {self.name}, {self.age} лет, "
+                f"детей: {len(self.children)}")
+
+    def calm_child(self, index: int) -> None:
+        """
+        Успокаивает ребёнка по индексу
+
+        :param index: индекс ребёнка в списке
+        """
+        self.children[index].calm_down()
+
+    def feed_child(self, index: int) -> None:
+        """
+        Кормит ребёнка по индексу
+
+        :param index: индекс ребёнка в списке
+        """
+        self.children[index].feed()
+
+
+def read_child(number: int) -> Child:
+    """
+    Запрашивает данные о ребёнке
+
+    :param number: порядковый номер ребёнка для подсказки
+    :return: объект Child
+    """
+    print(f"  Ребёнок #{number}")
+    name = input("  Имя: ")
+    age = int(input("  Возраст: "))
+    return Child(name, age)
+
+
+def read_parent(number: int) -> Parent:
+    """
+    Запрашивает данные о родителе и его детях
+
+    :param number: порядковый номер родителя для подсказки
+    :return: объект Parent с заполненным списком детей
+    """
+    print(f"\nРодитель #{number}")
+    name = input("Имя: ")
+    age = int(input("Возраст: "))
+    parent = Parent(name, age)
+
+    children_count = int(input("Сколько детей: "))
+    for j in range(children_count):
+        parent.add_child(read_child(j + 1))
+
+    return parent
+
+
+def read_parents() -> list[Parent]:
+    """
+    Запрашивает данные о всех родителях
+
+    :return: список объектов Parent
+    """
+    count = int(input("Введите количество родителей: "))
+    return [read_parent(i + 1) for i in range(count)]
+
+
+def show_parent_info(parents: list[Parent]) -> None:
+    """
+    Выводит информацию о выбранном родителе
+
+    :param parents: список всех родителей
+    """
+    index = int(input("Номер родителя: ")) - 1
+    print(parents[index])
+
+
+def show_children_info(parents: list[Parent]) -> None:
+    """
+    Выводит информацию о всех детях выбранного родителя
+
+    :param parents: список всех родителей
+    """
+    index = int(input("Номер родителя: ")) - 1
+    parent = parents[index]
+    if not parent.children:
+        print("У родителя нет детей")
+        return
+    for child in parent.children:
+        print(f"  {child}")
+
+
+def act_on_child(parents: list[Parent]) -> None:
+    """
+    Выполняет действие (успокоить/покормить) с выбранным ребёнком
+
+    :param parents: список всех родителей
+    """
+    parent_index = int(input("Номер родителя: ")) - 1
+    child_index = int(input("Номер ребёнка: ")) - 1
+
+    print("1 — успокоить, 2 — покормить")
+    action = input("Действие: ")
+
+    parent = parents[parent_index]
+    if action == ACTION_CALM:
+        parent.calm_child(child_index)
+        print("Ребёнок успокоен")
+    elif action == ACTION_FEED:
+        parent.feed_child(child_index)
+        print("Ребёнок покормлен")
+
+
+def show_menu() -> None:
+    """Выводит главное меню"""
+    print("\nМеню:")
+    print(f"{MENU_PARENT_INFO}) Информация о родителе")
+    print(f"{MENU_CHILDREN_INFO}) Информация о детях родителя")
+    print(f"{MENU_CHILD_ACTION}) Действие с ребёнком")
+    print(f"{MENU_EXIT}) Выход")
+
+
+def main() -> None:
+    """Точка входа: ввод данных и цикл меню"""
+    parents = read_parents()
+
+    while True:
+        show_menu()
+        choice = input("Выбор: ")
+
+        if choice == MENU_PARENT_INFO:
+            show_parent_info(parents)
+        elif choice == MENU_CHILDREN_INFO:
+            show_children_info(parents)
+        elif choice == MENU_CHILD_ACTION:
+            act_on_child(parents)
+        elif choice == MENU_EXIT:
+            break
+
+
+if __name__ == '__main__':
+    main()
