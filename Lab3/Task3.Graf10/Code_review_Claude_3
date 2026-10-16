@@ -1,0 +1,111 @@
+# Победитель — Claude
+
+# Аргументация:
+# Документация — единственное решение с docstring и аннотациями типов, что требуется заданием
+# Архитектура — логика разделена на 4 функции с чёткой ответственностью: чтение, поиск, запись, main
+# Итеративный DFS — не боится переполнения стека рекурсии при n ≤ 15, но в общем случае надёжнее рекурсивного
+# Именование — start, end, size, matrix, vertex — осмысленные имена
+# Стиль — соответствует PEP 8 и код-стайлу из лабораторных
+# Решение GPT тоже хорошее (ООП, рекурсия), но нет docstring и аннотаций типов. Решение DeepSeek — самое компактное, но документации нет вовсе.
+
+# Введены константы в верхнем регистре для имён файлов
+INPUT_FILENAME = 'FileName1.txt'
+OUTPUT_FILENAME = 'FileName2.txt'
+
+# Константа для обозначения отсутствия маршрутов
+NO_PATHS_MARKER = -1
+
+
+class Graph:
+    """Ориентированный граф, заданный матрицей смежности"""
+
+    def __init__(self, size: int, matrix: list[list[int]]) -> None:
+        """
+        :param size: количество вершин
+        :param matrix: матрица смежности размера size x size
+        """
+        self.size = size
+        self.matrix = matrix
+
+    def find_all_paths(self, start: int, end: int) -> list[list[int]]:
+        """
+        Находит все простые пути из start в end
+
+        Использует итеративный обход в глубину со стеком,
+        чтобы избежать переполнения стека рекурсии
+
+        :param start: начальная вершина (индекс с 0)
+        :param end: конечная вершина (индекс с 0)
+        :return: список путей, каждый путь — список индексов вершин
+        """
+        paths: list[list[int]] = []
+        stack: list[tuple[int, list[int]]] = [(start, [start])]
+
+        while stack:
+            current, path = stack.pop()
+            if current == end:
+                paths.append(path)
+                continue
+            for neighbor in range(self.size):
+                if (self.matrix[current][neighbor] == 1
+                        and neighbor not in path):
+                    stack.append((neighbor, path + [neighbor]))
+        return paths
+
+
+def read_graph(filename: str) -> tuple[int, list[list[int]]]:
+    """
+    Читает граф из файла
+
+    :param filename: имя файла с матрицей смежности
+    :return: (количество вершин, матрица смежности)
+    """
+    with open(filename, encoding='utf-8') as file:
+        lines = file.read().splitlines()
+
+    size = int(lines[0])
+    matrix = [
+        list(map(int, lines[i].split()))
+        for i in range(1, size + 1)
+    ]
+    return size, matrix
+
+
+def write_paths(filename: str, paths: list[list[int]]) -> None:
+    """
+    Записывает маршруты в файл
+
+    Если маршрутов нет — записывает -1
+    Иначе — количество и сами маршруты, отсортированные
+    по длине, затем лексикографически
+
+    :param filename: имя выходного файла
+    :param paths: список маршрутов
+    """
+    with open(filename, 'w', encoding='utf-8') as file:
+        if not paths:
+            file.write(f"{NO_PATHS_MARKER}\n")
+            return
+
+        paths.sort(key=lambda path: (len(path), path))
+        file.write(f"{len(paths)}\n")
+        for path in paths:
+            line = " ".join(str(vertex + 1) for vertex in path)
+            file.write(line + "\n")
+
+
+def main() -> None:
+    """Точка входа: чтение графа, поиск маршрутов, запись результата"""
+    size, matrix = read_graph(INPUT_FILENAME)
+
+    start = int(input("Введите K1: ")) - 1
+    end = int(input("Введите K2: ")) - 1
+
+    graph = Graph(size, matrix)
+    paths = graph.find_all_paths(start, end)
+
+    write_paths(OUTPUT_FILENAME, paths)
+
+
+if __name__ == '__main__':
+    main()
