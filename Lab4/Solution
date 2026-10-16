@@ -1,0 +1,47 @@
+from tkinter import *
+
+root = Tk()
+root.title("Тест")
+root.geometry("400x350")
+
+questions = []
+for i in range(5):
+    a = i + 2
+    b = i + 3
+    questions.append((a, b))
+
+entries = []
+result = None
+
+for i, (a, b) in enumerate(questions):
+    lbl = Label(root, text=str(a) + " * " + str(b) + " = ")
+    lbl.grid(row=i, column=0)
+    e = Entry(root)
+    e.grid(row=i, column=1)
+    entries.append(e)
+
+def check():
+    global result
+    correct = 0
+    for i, (a, b) in enumerate(questions):
+        val = entries[i].get()
+        if val != "":
+            try:
+                if int(val) == a * b:
+                    correct += 1
+                    entries[i].config(fg="black")
+                else:
+                    entries[i].config(fg="red")
+            except:
+                entries[i].config(fg="red")
+        else:
+            entries[i].config(fg="red")
+    if result:
+        result.destroy()
+    result = Label(root, text="Правильных ответов: " + str(correct))
+    result.grid(row=6, column=0, columnspan=2)
+
+btn = Button(root, text="Проверка", command=check)
+btn.grid(row=7, column=0, columnspan=2)
+
+root.mainloop()
