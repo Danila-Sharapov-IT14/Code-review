@@ -1,0 +1,86 @@
+"""
+Даны две непустые очереди; начало и конец первой равны A1 и A2,
+а второй — A3 и A4. Очереди содержат одинаковое количество элементов
+Объединить очереди в одну, в которой элементы исходных очередей чередуются
+(начиная с первого элемента первой очереди)
+Вывести ссылки на начало и конец полученной очереди
+Новые объекты типа Node не создавать
+"""
+
+
+class Node:
+    # Добавлены аннотации типов
+    # Имя next оставлено как атрибут, но параметр next_node для читаемости
+    def __init__(self, value: int) -> None:
+        self.value = value
+        self.next = None
+
+
+def create_queue(n: int) -> tuple[Node, Node]:
+    # Имя queue заменено на create_queue — понятнее назначение
+    # Имя n оставлено как общепринятое для количества
+    # Добавлены аннотации типов
+    values = list(map(
+        int,
+        input(f"Введите {n} элементов(а) очереди через пробел: ").split()
+    ))
+
+    head = Node(values[0])
+    tail = head
+    for value in values[1:]:
+        tail.next = Node(value)
+        tail = tail.next
+    return head, tail
+
+
+def merge_queues(first_head: Node, second_head: Node) -> tuple[Node, Node]:
+    # Имя queues заменено на merge_queues — глагол в начале
+    # Имена A1, A3 заменены на first_head, second_head
+    # Добавлены аннотации типов
+    head = first_head
+    tail = None
+    current_first, current_second = first_head, second_head
+
+    while current_first and current_second:
+        next_first = current_first.next
+        next_second = current_second.next
+        current_first.next = current_second
+
+        if next_first:
+            current_second.next = next_first
+        else:
+            tail = current_second
+        current_first, current_second = next_first, next_second
+
+    if not tail:
+        tail = first_head if current_first else second_head
+
+    return head, tail
+
+
+def print_queue(head: Node) -> None:
+    # Имя cur заменено на current — осмысленнее
+    # Добавлены аннотации типов
+    current = head
+    while current:
+        print(current.value, end=" -> ")
+        current = current.next
+    print("None")
+
+
+def main() -> None:
+    # Исполняемый код вынесен в функцию main
+    n = int(input("Введите количество элементов в каждой очереди: "))
+
+    first_head, _ = create_queue(n)
+    second_head, _ = create_queue(n)
+
+    head, tail = merge_queues(first_head, second_head)
+
+    print("\nОбъединённая очередь:")
+    print_queue(head)
+    print(f"Head: {head.value}, Tail: {tail.value}")
+
+
+if __name__ == '__main__':
+    main()
