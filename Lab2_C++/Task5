@@ -5,34 +5,27 @@
 Обязательно наличие дружественного интерфейса. Ввод данных организовать
 разными способами (с клавиатуры, рандом, из файла)
 
-Даны дек D и список L. Каждый исходный контейнер содержит не менее 5
-элементов. Вставить перед пятым с конца элементом списка последние 5 элементов дека в
-обратном порядке. Использовать один вызов функции-члена insert.
+Даны списки L1 и L2; список L1 имеет нечетное количество элементов.
+Переместить средний элемент списка L1 в конец списка L2. Использовать один вызов
+функции-члена splice.
 */
 
 #include <ctime>
-#include <deque>
 #include <list>
 #include <fstream>
 #include <iostream>
 
 using namespace std;
 
-// Шаблонная функция в PascalCase
+// Функция в PascalCase
 // Открывающая скобка на той же строке
-template <typename Container>
-void Input(Container& container, int n) { // Заполнение контейнеров
+void Input(list<int>& l, int n) { // Заполнение списков
     int mode, value;
     cout << "Выберете способ заполнения контейнера: " << endl;
     cout << "1) Ввод с клавиатуры." << endl;
     cout << "2) Ввод с помощью рандомайзера." << endl;
     cout << "3) Ввод данных из текстового файла." << endl;
     cin >> mode;
-    // Пробелы вокруг операторов
-    if (n < 5) {
-        cout << "Ошибка. Недопустимый размер." << endl;
-        return;
-    }
     switch (mode) {
     // Открывающая скобка на той же строке
     case 1: {
@@ -40,7 +33,7 @@ void Input(Container& container, int n) { // Заполнение контейн
         for (int i = 0; i < n; i++) {
             cout << "Введите " << i + 1 << " элемент: ";
             cin >> value;
-            container.insert(container.end(), value);
+            l.insert(l.end(), value);
         }
         break;
     }
@@ -49,13 +42,13 @@ void Input(Container& container, int n) { // Заполнение контейн
         srand(time(0));
         // Открывающая скобка на той же строке
         for (int i = 0; i < n; i++) {
-            container.insert(container.end(), rand() % 101 - 50);
+            l.insert(l.end(), rand() % 101 - 50);
         }
         break;
     }
     // Открывающая скобка на той же строке
     case 3: {
-        ifstream file("a.txt", ios::in); // a.txt {9 3 -44-82 75 2 5 9 -43 74 927 94 -27 3 57 1 0 74 473 84}
+        ifstream file("a.txt", ios::in); // a.txt { 27 -8 -11 -25 33 47 -30 -41 -8 3 -13 -29 -38 -18}
         // Пробелы вокруг операторов
         if (!file) {
             cout << "Ошибка. Файл не был открыт.";
@@ -64,7 +57,7 @@ void Input(Container& container, int n) { // Заполнение контейн
         // Открывающая скобка на той же строке
         for (int i = 0; i < n; i++) {
             file >> value;
-            container.insert(container.end(), value);
+            l.insert(l.end(), value);
         }
         file.close();
         break;
@@ -77,12 +70,11 @@ void Input(Container& container, int n) { // Заполнение контейн
     }
 }
 
-// Шаблонная функция в PascalCase
+// Функция в PascalCase
 // Открывающая скобка на той же строке
-template <typename Container>
-void Print(const Container& container) { // Вывод содержимого контейнеров
+void Print(const list<int> l) { // Вывод содержимого списков
     // Открывающая скобка на той же строке
-    for (auto it = container.begin(); it != container.end(); it++) {
+    for (auto it = l.begin(); it != l.end(); it++) {
         cout << *it << " ";
     }
     cout << endl;
@@ -90,40 +82,44 @@ void Print(const Container& container) { // Вывод содержимого к
 
 // Функция в PascalCase
 // Открывающая скобка на той же строке
-void Insert(deque<int>& d, list<int>& l) { // Вставка перед 5 с конца элемента списка последних 5 элементов дека в обратном порядке
-    list<int>::iterator it = l.end();
+void Splice(list<int>& l1, list<int>& l2) { // Помещает средний элемент списка L1 в конец списка L2
+    list<int>::iterator it;
+    it = l1.begin();
+    auto size = l1.size();
     // Открывающая скобка на той же строке
-    for (int i = 0; i < 5; i++) {
-        --it;
+    for (int i = 0; i < size / 2; i++) {
+        ++it;
     }
-    // Пробелы вокруг операторов
-    for (int i = 4; i >= 0; i--) {
-        it = l.insert(it, d[d.size() - 1 - i]);
-    }
+    l2.splice(l2.end(), l1, it);
 }
 
 // Открывающая скобка на той же строке
 int main() {
     setlocale(LC_ALL, "Russian");
     int n1, n2;
-    deque<int> d;
-    list<int> l;
-    cout << "Введите размерность дека n1 (n1 >= 5): ";
+    list<int> l1;
+    list<int> l2;
+    cout << "Введите размерность списка n1 (n1 - нечётное): ";
     cin >> n1;
-    Input(d, n1);
-    cout << "Введите размерность списка n2 (n2 >= 5): ";
+    Input(l1, n1);
+    cout << "Введите размерность списка n2 (n2 >= 0): ";
     cin >> n2;
-    Input(l, n2);
-    cout << "Изначальное содержимое контейнеров." << endl;
-    cout << "Дек: ";
-    Print(d);
-    cout << "Список: ";
-    Print(l);
-    Insert(d, l);
-    cout << "Изменённое содержание контейнеров." << endl;
-    cout << "Дек: ";
-    Print(d);
-    cout << "Список: ";
-    Print(l);
+    // Пробелы вокруг операторов
+    if (n1 < 0 || n2 < 0 || n1 % 2 != 1) {
+        cout << "Ошибка. Недопустимый размер списка.";
+        return 1;
+    }
+    Input(l2, n2);
+    cout << "Изначальное содержимое списков." << endl;
+    cout << "L1: ";
+    Print(l1);
+    cout << "L2: ";
+    Print(l2);
+    Splice(l1, l2);
+    cout << "Изменённое содержание списков." << endl;
+    cout << "L1: ";
+    Print(l1);
+    cout << "L2: ";
+    Print(l2);
     return 0;
 }
