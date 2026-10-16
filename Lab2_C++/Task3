@@ -1,8 +1,7 @@
-/*
-Дан односвязный линейный список и указатель на голову списка P1. Необходимо
-вставить значение M перед каждым вторым элементом списка, и вывести ссылку на последний
-элемент полученного списка P2. При нечетном числе элементов исходного списка в конец
-списка вставлять не надо.
+/* Дан текстовый файл, в первой строке которого хранится число N, а во второй
+строке N целых чисел. Необходимо создать упорядоченный по убыванию список, в который
+поместить все эти элементы, при этом очередной элемент вставлять в список так, чтобы не
+нарушалась его упорядоченность.
 
 Для каждой динамической структуры должен быть предусмотрен стандартный набор методов -
 добавления/удаления/вывода элементов.
@@ -10,6 +9,7 @@
 */
 
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -44,43 +44,22 @@ public:
 
     // Метод в PascalCase
     // Открывающая скобка на той же строке
-    void Add(int value) {
+    void InsertSorted(int value) {
         Node* newNode = new Node(value);
         // Пробелы вокруг операторов
-        if (head_ == nullptr) {
+        if (head_ == nullptr || head_->data_ < value) {
+            newNode->next_ = head_;
             head_ = newNode;
         }
         // Открывающая скобка на той же строке
         else {
             Node* current = head_;
             // Пробелы вокруг операторов
-            while (current->next_ != nullptr) {
+            while (current->next_ != nullptr && current->next_->data_ > value) {
                 current = current->next_;
             }
+            newNode->next_ = current->next_;
             current->next_ = newNode;
-        }
-    }
-
-    // Метод в PascalCase
-    // Открывающая скобка на той же строке
-    void InsertBeforeEverySecond(int value) {
-        Node* current = head_;
-        int count = 1;
-
-        // Пробелы вокруг операторов
-        while (current != nullptr && current->next_ != nullptr) {
-            // Пробелы вокруг операторов
-            if (count % 2 == 1) {
-                Node* newNode = new Node(value);
-                newNode->next_ = current->next_;
-                current->next_ = newNode;
-                current = newNode->next_;
-            }
-            // Открывающая скобка на той же строке
-            else {
-                current = current->next_;
-            }
-            count++;
         }
     }
 
@@ -98,78 +77,49 @@ public:
 
     // Метод в PascalCase
     // Открывающая скобка на той же строке
-    Node* GetLastNode() {
-        Node* current = head_;
+    void ReadFromFile(const string& filename) {
+        ifstream file(filename);
         // Пробелы вокруг операторов
-        while (current != nullptr && current->next_ != nullptr) {
-            current = current->next_;
+        if (!file.is_open()) {
+            cerr << "Ошибка открытия файла!" << endl;
+            return;
         }
-        return current;
-    }
 
-    // Метод в PascalCase
-    // Открывающая скобка на той же строке
-    void ClearList() {
-        // Пробелы вокруг операторов
-        while (head_ != nullptr) {
-            Node* temp = head_;
-            head_ = head_->next_;
-            delete temp;
+        int n;
+        file >> n;
+
+        int value;
+        // Открывающая скобка на той же строке
+        for (int i = 0; i < n; ++i) {
+            file >> value;
+            InsertSorted(value);
         }
-        cout << "Список очищен." << endl;
+
+        file.close();
     }
 
     // Дружественный интерфейс
-    friend void InsertBeforeEverySecond(LinkedList& list, int value);
+    friend void ReadFromFile(LinkedList& list, const string& filename);
 };
 
 // Функция в PascalCase
 // Открывающая скобка на той же строке
-void InsertBeforeEverySecond(LinkedList& list, int value) {
-    list.InsertBeforeEverySecond(value);
+void ReadFromFile(LinkedList& list, const string& filename) {
+    list.ReadFromFile(filename);
 }
 
 // Открывающая скобка на той же строке
 int main() {
     // Переменная в camelCase
     LinkedList list;
-    int n, value, m;
+    string filename;
 
-    cout << "Введите количество элементов в списке: ";
-    cin >> n;
-    cout << "Введите элементы списка: ";
-    // Открывающая скобка на той же строке
-    for (int i = 0; i < n; ++i) {
-        cin >> value;
-        list.Add(value);
-    }
+    cout << "Введите имя файла: ";
+    cin >> filename;
 
-    cout << "Введите значение M для вставки: ";
-    cin >> m;
+    ReadFromFile(list, filename);
 
-    // Вставка значения M перед каждым вторым элементом
-    InsertBeforeEverySecond(list, m);
-
-    cout << "Список после вставки: ";
-    list.Print();
-
-    // Получение указателя на последний элемент списка
-    Node* lastNode = list.GetLastNode();
-
-    // Вывод результата
-    // Пробелы вокруг операторов
-    if (lastNode != nullptr) {
-        cout << "Указатель на последний элемент списка: " << lastNode << endl;
-        cout << "Значение последнего элемента: " << lastNode->data_ << endl;
-    }
-    // Открывающая скобка на той же строке
-    else {
-        cout << "Список пуст." << endl;
-    }
-    list.ClearList();
-
-    // Проверка, что список пуст
-    cout << "Проверка списка после очистки: ";
+    cout << "Упорядоченный список: ";
     list.Print();
 
     return 0;
