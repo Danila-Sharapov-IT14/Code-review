@@ -1,0 +1,51 @@
+class Graph:
+    def __init__(self, n, matrix):
+        self.n = n
+        self.matrix = matrix
+
+    def find_paths(self, start, end):
+        all_paths = []
+        self._dfs(start, end, [start], all_paths)
+        return all_paths
+
+    def _dfs(self, current, end, path, all_paths):
+        if current == end:
+            all_paths.append(list(path))
+            return
+        for neighbor in range(self.n):
+            if self.matrix[current][neighbor] == 1:
+                if neighbor not in path:
+                    path.append(neighbor)
+                    self._dfs(neighbor, end, path, all_paths)
+                    path.pop()
+
+
+def read_graph(filename):
+    with open(filename) as f:
+        n = int(f.readline())
+        matrix = [list(map(int, f.readline().split()))
+                  for _ in range(n)]
+    return n, matrix
+
+
+def main():
+    n, matrix = read_graph('FileName1.txt')
+    graph = Graph(n, matrix)
+
+    k1 = int(input("Введите K1: ")) - 1
+    k2 = int(input("Введите K2: ")) - 1
+
+    paths = graph.find_paths(k1, k2)
+
+    with open('FileName2.txt', 'w') as f:
+        if not paths:
+            f.write("-1\n")
+            return
+        paths.sort(key=lambda p: (len(p), p))
+        f.write(f"{len(paths)}\n")
+        for path in paths:
+            f.write(" ".join(str(v + 1) for v in path) + "\n")
+
+
+if __name__ == '__main__':
+    main()
