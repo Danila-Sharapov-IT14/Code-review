@@ -1,0 +1,48 @@
+import random
+import string
+
+
+class PasswordGenerator:
+    LEVELS = {
+        1: {"name": "Низкий", "length": 8,
+            "chars": string.ascii_lowercase},
+        2: {"name": "Средний", "length": 12,
+            "chars": string.ascii_letters + string.digits},
+        3: {"name": "Высокий", "length": 16,
+            "chars": string.ascii_letters + string.digits
+                     + string.punctuation},
+    }
+
+    def __init__(self):
+        self.level = None
+
+    def choose_level(self):
+        print("Доступные уровни сложности:")
+        for key, info in self.LEVELS.items():
+            print(f"  {key}. {info['name']} — {info['length']} символов")
+
+        while True:
+            try:
+                level = int(input("Выберите уровень (1-3): "))
+                if level in self.LEVELS:
+                    self.level = level
+                    return
+                print("Такого уровня нет, попробуйте снова")
+            except ValueError:
+                print("Введите число")
+
+    def generate(self):
+        info = self.LEVELS[self.level]
+        return ''.join(
+            random.choice(info["chars"]) for _ in range(info["length"])
+        )
+
+
+def main():
+    generator = PasswordGenerator()
+    generator.choose_level()
+    print(f"Ваш пароль: {generator.generate()}")
+
+
+if __name__ == '__main__':
+    main()
