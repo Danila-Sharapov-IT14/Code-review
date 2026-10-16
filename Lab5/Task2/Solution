@@ -1,0 +1,23 @@
+# программа считает заказы пиццерии
+
+N = int(input("Введите кол-во заказов: "))
+
+orders = {}
+for i in range(N):
+    line = input(str(i+1) + " заказ: ").split()
+    name = line[0]
+    pizza = line[1]
+    count = int(line[2])
+
+    if name not in orders:
+        orders[name] = {}
+
+    if pizza in orders[name]:
+        orders[name][pizza] += count
+    else:
+        orders[name][pizza] = count
+
+for name in sorted(orders):
+    print(name + ":")
+    for pizza in sorted(orders[name]):
+        print("  " + pizza + ": " + str(orders[name][pizza]))
