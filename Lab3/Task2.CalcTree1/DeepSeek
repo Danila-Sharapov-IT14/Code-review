@@ -1,0 +1,61 @@
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None
+
+
+def build_tree(tokens):
+    stack = []
+    for token in tokens:
+        if token in '+-*':
+            right = stack.pop()
+            left = stack.pop()
+            code = {'+': -1, '-': -2, '*': -3}[token]
+            stack.append(Node(code))
+            stack[-1].left = left
+            stack[-1].right = right
+        else:
+            stack.append(Node(int(token)))
+    return stack[0]
+
+
+def evaluate(node):
+    if node.data >= 0:
+        return node.data
+    if node.data == -1:
+        return evaluate(node.left) + evaluate(node.right)
+    if node.data == -2:
+        return evaluate(node.left) - evaluate(node.right)
+    if node.data == -3:
+        return evaluate(node.left) * evaluate(node.right)
+
+
+def has_subtraction(node):
+    if node is None:
+        return False
+    if node.data == -2:
+        return True
+    return has_subtraction(node.left) or has_subtraction(node.right)
+
+
+def remove_subtraction(node):
+    if node is None:
+        return None
+    if has_subtraction(node):
+        return Node(evaluate(node))
+    node.left = remove_subtraction(node.left)
+    node.right = remove_subtraction(node.right)
+    return node
+
+
+def main():
+    with open('filename.txt') as f:
+        tokens = f.read().split()
+    root = build_tree(tokens)
+    root = remove_subtraction(root)
+    print(root)
+
+
+if __name__ == '__main__':
+    main()
