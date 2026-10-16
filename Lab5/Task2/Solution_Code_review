@@ -1,0 +1,64 @@
+"""
+Учёт заказов пиццерии
+
+Пользователь вводит N заказов вида «Покупатель Название Количество»
+Программа суммирует одинаковые заказы одного покупателя
+и выводит их по алфавиту: сначала покупатели, затем пиццы
+"""
+
+from collections import defaultdict
+
+# Константы сообщений
+CUSTOMER_HEADER_TEMPLATE = "{name}:"
+ORDER_LINE_TEMPLATE = "  {pizza}: {count}"
+
+# Константа: количество полей в строке заказа
+ORDER_FIELDS_COUNT = 3
+
+
+def read_orders(count: int) -> dict[str, dict[str, int]]:
+    """
+    Запрашивает заказы и агрегирует их по покупателям и пиццам
+
+    :param count: количество заказов
+    :return: словарь вида {покупатель: {пицца: количество}}
+    """
+    orders: dict[str, dict[str, int]] = defaultdict(
+        lambda: defaultdict(int)
+    )
+
+    for i in range(count):
+        line = input(f"{i + 1} заказ: ").split()
+
+        if len(line) < ORDER_FIELDS_COUNT:
+            continue
+
+        customer, pizza, raw_count = line[0], line[1], line[2]
+        orders[customer][pizza] += int(raw_count)
+
+    return orders
+
+
+def print_orders(orders: dict[str, dict[str, int]]) -> None:
+    """
+    Выводит заказы по алфавиту: покупатели и их пиццы
+
+    :param orders: словарь заказов
+    """
+    for customer in sorted(orders):
+        print(CUSTOMER_HEADER_TEMPLATE.format(name=customer))
+
+        for pizza in sorted(orders[customer]):
+            count = orders[customer][pizza]
+            print(ORDER_LINE_TEMPLATE.format(pizza=pizza, count=count))
+
+
+def main() -> None:
+    """Точка входа: ввод заказов и вывод результата"""
+    count = int(input("Введите кол-во заказов: "))
+    orders = read_orders(count)
+    print_orders(orders)
+
+
+if __name__ == '__main__':
+    main()
