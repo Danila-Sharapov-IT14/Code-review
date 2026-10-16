@@ -1,0 +1,101 @@
+"""
+Игра «Угадайка»
+
+Иван загадал число от 1 до N. Сергей называет наборы чисел,
+Иван отвечает «Да», если задуманное число есть среди названных,
+иначе «Нет». Программа сужает множество возможных чисел
+и выводит его в конце
+"""
+
+# Константы ответов Ивана
+ANSWER_YES = "Да"
+ANSWER_NO = "Нет"
+
+# Константа команды выхода
+HELP_COMMAND = "Помогите!"
+
+# Константы сообщений
+PROMPT_NUMBERS = "Нужное число есть среди вот этих чисел: "
+PROMPT_ANSWER = "Ответ Ивана: "
+RESULT_TEMPLATE = "Иван мог загадать следующие числа: {numbers}"
+
+
+def read_max_number() -> int:
+    """
+    Запрашивает максимальное число N
+
+    :return: максимальное возможное число
+    """
+    return int(input("Введите максимальное число: "))
+
+
+def filter_possible(
+    possible: set[int], called: set[int], answer: str
+) -> set[int]:
+    """
+    Сужает множество возможных чисел по ответу Ивана
+
+    :param possible: текущее множество возможных чисел
+    :param called: названные Сергеем числа
+    :param answer: ответ Ивана («Да» или «Нет»)
+    :return: новое множество возможных чисел
+    """
+    if answer == ANSWER_YES:
+        return possible & called
+    return possible - called
+
+
+def play_round(possible: set[int]) -> set[int]:
+    """
+    Проводит один раунд: ввод чисел и ответа Ивана
+
+    :param possible: текущее множество возможных чисел
+    :return: новое множество возможных чисел
+    """
+    line = input(PROMPT_NUMBERS)
+    called = set(map(int, line.split()))
+    answer = input(PROMPT_ANSWER)
+    return filter_possible(possible, called, answer)
+
+
+def play_game(max_number: int) -> set[int]:
+    """
+    Запускает игровой цикл до команды «Помогите!» или одного числа
+
+    :param max_number: максимальное возможное число
+    :return: множество чисел, которые мог загадать Иван
+    """
+    possible = set(range(1, max_number + 1))
+
+    while len(possible) > 1:
+        line = input(PROMPT_NUMBERS)
+
+        if line == HELP_COMMAND:
+            break
+
+        called = set(map(int, line.split()))
+        answer = input(PROMPT_ANSWER)
+        possible = filter_possible(possible, called, answer)
+
+    return possible
+
+
+def print_result(possible: set[int]) -> None:
+    """
+    Выводит возможные числа в порядке возрастания
+
+    :param possible: множество возможных чисел
+    """
+    numbers = " ".join(str(x) for x in sorted(possible))
+    print(RESULT_TEMPLATE.format(numbers=numbers))
+
+
+def main() -> None:
+    """Точка входа: ввод N, игра, вывод результата"""
+    max_number = read_max_number()
+    possible = play_game(max_number)
+    print_result(possible)
+
+
+if __name__ == '__main__':
+    main()
