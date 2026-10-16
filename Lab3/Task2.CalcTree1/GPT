@@ -1,0 +1,86 @@
+OPERATIONS = {
+    '+': -1,
+    '-': -2,
+    '*': -3,
+}
+
+
+class Node:
+    def __init__(self, value, left=None, right=None):
+        self.value = value
+        self.left = left
+        self.right = right
+
+    def is_operator(self):
+        return self.value < 0
+
+
+class ExpressionTree:
+    def __init__(self):
+        self.root = None
+
+    def build_from_rpn(self, tokens):
+        stack = []
+        for token in tokens:
+            if token in OPERATIONS:
+                right = stack.pop()
+                left = stack.pop()
+                node = Node(OPERATIONS[token], left, right)
+                stack.append(node)
+            else:
+                stack.append(Node(int(token)))
+        self.root = stack[0]
+        return self.root
+
+    def evaluate(self, node):
+        if node is None:
+            return 0
+        if not node.is_operator():
+            return node.value
+        left_val = self.evaluate(node.left)
+        right_val = self.evaluate(node.right)
+        if node.value == -1:
+            return left_val + right_val
+        if node.value == -2:
+            return left_val - right_val
+        if node.value == -3:
+            return left_val * right_val
+
+    def contains_subtraction(self, node):
+        if node is None:
+            return False
+        if node.value == -2:
+            return True
+        return (self.contains_subtraction(node.left)
+                or self.contains_subtraction(node.right))
+
+    def simplify(self, node):
+        if node is None:
+            return None
+        if self.contains_subtraction(node):
+            return Node(self.evaluate(node))
+        node.left = self.simplify(node.left)
+        node.right = self.simplify(node.right)
+        return node
+
+    def print_tree(self, node, level=0):
+        if node is None:
+            return
+        self.print_tree(node.right, level + 1)
+        print('    ' * level + str(node.value))
+        self.print_tree(node.left, level + 1)
+
+
+def main():
+    with open('filename.txt') as f:
+        tokens = f.read().split()
+
+    tree = ExpressionTree()
+    tree.build_from_rpn(tokens)
+    tree.root = tree.simplify(tree.root)
+    tree.print_tree(tree.root)
+    print("Указатель на корень:", tree.root)
+
+
+if __name__ == '__main__':
+    main()
