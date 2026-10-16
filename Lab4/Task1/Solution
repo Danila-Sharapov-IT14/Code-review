@@ -1,0 +1,95 @@
+# модель семьи: родители и дети
+# тут всё в куче, классы, функции, ввод, меню
+
+import sys
+
+class child:
+    def __init__(self, n, a):
+        self.n = n  # имя
+        self.a = a  # возраст
+        self.c = False  # спокоен?
+        self.h = True  # голоден?
+
+    def __str__(self):
+        return self.n + " " + str(self.a)
+
+
+class parent:
+    def __init__(self, n, a):
+        self.n = n
+        self.a = a
+        self.ch = []
+
+    def add(self, c):
+        self.ch.append(c)
+
+    def calm(self, i):
+        self.ch[i].c = True
+
+    def feed(self, i):
+        self.ch[i].h = False
+
+    def info(self):
+        s = "Родитель: " + self.n + ", возраст: " + str(self.a) + ", детей: " + str(len(self.ch))
+        return s
+
+
+def input_child(num):
+    print("Ребёнок #" + str(num))
+    name = input("Имя: ")
+    age = int(input("Возраст: "))
+    return child(name, age)
+
+
+def input_parent(num):
+    print("Родитель #" + str(num))
+    name = input("Имя: ")
+    age = int(input("Возраст: "))
+    p = parent(name, age)
+    cnt = int(input("Сколько детей: "))
+    for j in range(cnt):
+        p.add(input_child(j + 1))
+    return p
+
+
+def show_menu():
+    print("")
+    print("Меню:")
+    print("1) Информация о родителе")
+    print("2) Информация о детях родителя")
+    print("3) Действие с ребёнком")
+    print("4) Выход")
+
+
+parents = []
+N = int(input("Введите количество родителей: "))
+for i in range(N):
+    parents.append(input_parent(i + 1))
+
+while True:
+    show_menu()
+    ch = input("Выбор: ")
+
+    if ch == "1":
+        k = int(input("Номер родителя: ")) - 1
+        print(parents[k].info())
+
+    elif ch == "2":
+        k = int(input("Номер родителя: ")) - 1
+        for c in parents[k].ch:
+            print("  " + c.n + " (" + str(c.a) + " лет), спокоен: " + str(c.c) + ", голоден: " + str(c.h))
+
+    elif ch == "3":
+        k = int(input("Номер родителя: ")) - 1
+        i = int(input("Номер ребёнка: ")) - 1
+        print("1 - успокоить, 2 - покормить")
+        a = input("Действие: ")
+        if a == "1":
+            parents[k].calm(i)
+            print("Ребёнок успокоен")
+        elif a == "2":
+            parents[k].feed(i)
+            print("Ребёнок покормлен")
+
+    elif ch == "4":
+        sys.exit()
