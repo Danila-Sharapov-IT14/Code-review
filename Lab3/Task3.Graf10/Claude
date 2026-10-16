@@ -1,0 +1,99 @@
+"""
+Поиск всех маршрутов в ориентированном графе
+
+Граф задан матрицей смежности в файле FileName1
+Результат записывается в FileName2: число маршрутов и сами маршруты,
+отсортированные по длине, затем лексикографически
+"""
+
+
+class Graph:
+    """Ориентированный граф, заданный матрицей смежности"""
+
+    def __init__(self, size: int, matrix: list[list[int]]) -> None:
+        """
+        :param size: количество вершин
+        :param matrix: матрица смежности размера size x size
+        """
+        self.size = size
+        self.matrix = matrix
+
+    def find_all_paths(self, start: int, end: int) -> list[list[int]]:
+        """
+        Находит все простые пути из start в end
+
+        :param start: начальная вершина (индекс с 0)
+        :param end: конечная вершина (индекс с 0)
+        :return: список путей, каждый путь — список индексов вершин
+        """
+        paths: list[list[int]] = []
+        stack: list[tuple[int, list[int]]] = [(start, [start])]
+
+        while stack:
+            current, path = stack.pop()
+            if current == end:
+                paths.append(path)
+                continue
+            for neighbor in range(self.size):
+                if (self.matrix[current][neighbor] == 1
+                        and neighbor not in path):
+                    stack.append((neighbor, path + [neighbor]))
+        return paths
+
+
+def read_graph(filename: str) -> tuple[int, list[list[int]]]:
+    """
+    Читает граф из файла
+
+    :param filename: имя файла с матрицей смежности
+    :return: (количество вершин, матрица смежности)
+    """
+    with open(filename, encoding='utf-8') as file:
+        lines = file.read().splitlines()
+
+    size = int(lines[0])
+    matrix = [
+        list(map(int, lines[i].split()))
+        for i in range(1, size + 1)
+    ]
+    return size, matrix
+
+
+def write_paths(filename: str, paths: list[list[int]]) -> None:
+    """
+    Записывает маршруты в файл
+
+    Если маршрутов нет — записывает -1
+    Иначе — количество и сами маршруты, отсортированные
+    по длине, затем лексикографически
+
+    :param filename: имя выходного файла
+    :param paths: список маршрутов
+    """
+    with open(filename, 'w', encoding='utf-8') as file:
+        if not paths:
+            file.write("-1\n")
+            return
+
+        paths.sort(key=lambda path: (len(path), path))
+        file.write(f"{len(paths)}\n")
+        for path in paths:
+            line = " ".join(str(vertex + 1) for vertex in path)
+            file.write(line + "\n")
+
+
+def main() -> None:
+    """Точка входа: чтение графа, поиск маршрутов, запись результата"""
+    size, matrix = read_graph('FileName1.txt')
+
+    start = int(input("Введите K1: ")) - 1
+    end = int(input("Введите K2: ")) - 1
+
+    graph = Graph(size, matrix)
+    paths = graph.find_all_paths(start, end)
+
+    write_paths('FileName2.txt', paths)
+
+
+if __name__ == '__main__':
+    main()
