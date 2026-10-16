@@ -1,0 +1,80 @@
+"""
+Определение страны по названию города
+
+Пользователь вводит количество стран, затем для каждой страны —
+название и список городов. После этого вводятся три города,
+и программа сообщает, в какой стране каждый из них находится
+"""
+
+# Константа: сколько городов запрашивается у пользователя
+CITIES_TO_CHECK = 3
+
+# Константа: сообщение об отсутствии данных
+NO_DATA_TEMPLATE = "По городу {city} данных нет"
+
+# Константа: сообщение о найденной стране
+FOUND_TEMPLATE = "Город {city} расположен в стране {country}"
+
+
+def read_countries(count: int) -> dict[str, list[str]]:
+    """
+    Запрашивает данные о странах и их городах
+
+    :param count: количество стран
+    :return: словарь вида {страна: [города]}
+    """
+    countries: dict[str, list[str]] = {}
+
+    for i in range(count):
+        line = input(f"{i + 1} страна: ").split()
+        country_name = line[0]
+        cities = line[1:]
+        countries[country_name] = cities
+
+    return countries
+
+
+def find_country(
+    city: str, countries: dict[str, list[str]]
+) -> str | None:
+    """
+    Ищет страну, в которой находится указанный город
+
+    :param city: название города
+    :param countries: словарь стран и городов
+    :return: название страны или None, если город не найден
+    """
+    for country_name, cities in countries.items():
+        if city in cities:
+            return country_name
+    return None
+
+
+def check_cities(
+    countries: dict[str, list[str]], count: int
+) -> None:
+    """
+    Запрашивает города и выводит страну для каждого
+
+    :param countries: словарь стран и городов
+    :param count: сколько городов проверить
+    """
+    for i in range(count):
+        city = input(f"{i + 1} город: ")
+        country = find_country(city, countries)
+
+        if country is None:
+            print(NO_DATA_TEMPLATE.format(city=city))
+        else:
+            print(FOUND_TEMPLATE.format(city=city, country=country))
+
+
+def main() -> None:
+    """Точка входа: ввод данных и проверка городов"""
+    count = int(input("Кол-во стран: "))
+    countries = read_countries(count)
+    check_cities(countries, CITIES_TO_CHECK)
+
+
+if __name__ == '__main__':
+    main()
