@@ -1,0 +1,57 @@
+// К-ичные числа. Среди чисел в системе счисления с основанием K (2≤K≤10) определить сколько
+// имеется чисел из N (1 < N < 20, N + K < 26) разрядов таких, что в их записи содержится более
+// трех подряд идущих нулей. Для того, чтобы избежать переполнения, ответ представьте в виде
+// вещественного числа.
+
+#include <iostream>
+
+using namespace std;
+
+// Открывающая скобка на той же строке
+int main() {
+    setlocale(LC_ALL, "ru");
+    int k, n;
+    cout << "Введите систему счисления: ";
+    cin >> k;
+    cout << "количество разрядов: ";
+    cin >> n;
+
+    // Переменные в camelCase
+    // Пробелы вокруг операторов
+    float noZero, oneZero, twoZero, threeZero, fourZero;
+    float prevNoZero, prevOneZero, prevTwoZero, prevThreeZero, prevFourZero;
+
+    // Пробелы вокруг операторов
+    if (k < 2 || k > 10 || n <= 1 || n >= 20 || (n + k) >= 26) {
+        cout << "Некорректные данные, повторите ввод";
+    }
+    // Открывающая скобка на той же строке
+    else {
+        noZero = k - 1;
+        oneZero = 1;
+        twoZero = 0;
+        threeZero = 0;
+        fourZero = 0;
+
+        // Переменная i объявлена в цикле
+        // Открывающая скобка на той же строке
+        for (int i = 2; i <= n; i++) {
+            prevNoZero = noZero;
+            prevOneZero = oneZero;
+            prevTwoZero = twoZero;
+            prevThreeZero = threeZero;
+            prevFourZero = fourZero;
+
+            // Обновление количества чисел по классам
+            noZero = prevNoZero * (k - 1) + prevOneZero * (k - 1) + prevThreeZero * (k - 1) + prevTwoZero * (k - 1) + prevFourZero * (k - 1); // нет нулей на конце
+            oneZero = prevNoZero; // один ноль на конце
+            twoZero = prevOneZero; // два нуля на конце
+            threeZero = prevTwoZero; // три нуля на конце
+            fourZero = prevThreeZero + prevFourZero * k; // 4 нуля
+        }
+
+        cout << "Количество чисел, содержащих более трёх идущих нулей: " << fourZero;
+    }
+
+    return 0;
+}
