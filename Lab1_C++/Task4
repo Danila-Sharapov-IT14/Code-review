@@ -1,0 +1,75 @@
+// Во всех заданиях данной подгруппы предполагается, что исходные строки, определяющие выражения,
+// не содержат пробелов. При выполнении заданий не следует использовать оператор цикла.
+// Вывести значение логического выражения, заданного в виде строки S. Выражение определяется следующим
+// образом («T» — True, «F» — False):
+//	<выражение> :: = T | F | And(<выражение>, <выражение>) | Or(<выражение>, <выражение>)
+
+#include <iostream>
+#include <string>
+#include <windows.h>
+
+using namespace std;
+
+// Функция в PascalCase
+// Открывающая скобка на той же строке
+bool EvaluateExpression(const string& s, int& i) {
+    bool left, right;
+    // Открывающая скобка на той же строке
+    while (i < s.length() && s[i] == ' ') {
+        i++;
+    }
+    // Пробелы вокруг операторов
+    if (i == s.length()) {
+        return false;
+    }
+    // Пробелы вокруг операторов
+    if (s[i] == 'T') {
+        i++;
+        return true;
+    }
+    // Пробелы вокруг операторов
+    if (s[i] == 'F') {
+        i++;
+        return false;
+    }
+    // Пробелы вокруг операторов
+    if (s.substr(i, 4) == "And(") {
+        i += 4;
+        left = EvaluateExpression(s, i);
+        i++; // пропускаем запятую
+        right = EvaluateExpression(s, i);
+        i++; // пропуск скобки
+        return left && right;
+    }
+    // Пробелы вокруг операторов
+    if (s.substr(i, 3) == "Or(") {
+        i += 3;
+        left = EvaluateExpression(s, i);
+        i++;
+        right = EvaluateExpression(s, i);
+        i++;
+        return left || right;
+    }
+    return false;
+}
+
+// Открывающая скобка на той же строке
+int main() {
+    setlocale(LC_ALL, "Russian");
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+    string s;
+    cout << "Введите логическое выражение, заданное в виде строки s: ";
+    getline(cin, s);
+    int i = 0;
+    bool res = EvaluateExpression(s, i);
+    // Пробелы вокруг операторов
+    if (res == true) {
+        cout << "Значение логического выражения - T";
+    }
+    // Открывающая скобка на той же строке
+    else {
+        cout << "Значение логического выражения - F";
+    }
+    return 0;
+}
