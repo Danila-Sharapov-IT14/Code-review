@@ -1,0 +1,153 @@
+"""
+Даны ссылки A1 и A2 на барьерный и текущий элементы непустого
+двусвязного списка, причем текущий элемент не совпадает с барьерным
+Включить в класс IntListB функцию DeleteCurrent целого типа, удаляющую
+из списка текущий элемент и возвращающую его значение
+Текущим становится следующий элемент или, если следующий элемент
+является барьерным, предыдущий элемент списка
+Функция также вызывает для удаленного элемента метод Dispose
+Если текущим элементом является барьерный элемент, то функция
+не выполняет никаких действий и возвращает 0
+С помощью этой функции, а также метода IsBarrier логического типа
+(возвращает true, если текущий элемент списка является его барьерным
+элементом, и false в противном случае), удалить из исходного списка
+пять элементов (или все элементы, если их менее пяти) и вывести их значения
+Вывести также ссылку на новый текущий элемент списка
+
+Описать класс IntListB, содержащий следующие члены:
+• закрытые поля barrier и current типа Node
+  (барьерный и текущий элементы списка)
+• конструктор с параметрами aBarrier и aCurrent — барьерным и текущим
+  элементами существующего списка
+• процедура InsertLast(D), которая добавляет новый элемент со значением D
+  в конец списка (D — входной параметр целого типа,
+  добавленный элемент становится текущим)
+• процедура Put (без параметров), которая выводит ссылку на поле current,
+  используя метод Put класса PT
+"""
+
+# Введена константа в верхнем регистре для количества удаляемых элементов
+DELETE_COUNT = 5
+
+
+class Node:
+    """Класс, представляющий узел двусвязного списка с барьерным элементом"""
+
+    # Добавлены аннотации типов
+    # Имена prev и next оставлены как атрибуты, параметры next_node/prev_node
+    def __init__(self, data: int | None = None,
+                 next_node: 'Node | None' = None,
+                 prev_node: 'Node | None' = None) -> None:
+        self.data = data
+        self.prev = prev_node
+        self.next = next_node
+
+    def __str__(self) -> str:
+        # Добавлен __str__ для читаемого вывода ссылок на узлы
+        return str(self.data)
+
+    def dispose(self) -> None:
+        """Метод для удаления узла (в Python сборка мусора
+        делает это автоматически)"""
+        del self
+
+
+class IntListB:
+    """Класс, реализующий двусвязный список с барьерным элементом"""
+
+    # Добавлены аннотации типов
+    def __init__(self) -> None:
+        self.barrier = Node(0)
+        self.barrier.next = self.barrier
+        self.barrier.prev = self.barrier
+        self.current = self.barrier
+
+    def insert_last(self, data: int) -> None:
+        # Имя append заменено на insert_last — соответствует процедуре
+        # InsertLast(D) из задания
+        # Добавлены аннотации типов
+        new_node = Node(data)
+        last = self.barrier.prev
+
+        last.next = new_node
+        new_node.prev = last
+        new_node.next = self.barrier
+        self.barrier.prev = new_node
+
+        # По заданию добавленный элемент становится текущим
+        self.current = new_node
+
+    def is_barrier(self, node: 'Node') -> bool:
+        # Добавлены аннотации типов
+        return node == self.barrier
+
+    def delete_current(self) -> int:
+        # Добавлены аннотации типов
+        # Имена prev_node и next_node заменены на prev_element, next_element,
+        # чтобы не путать с параметрами Node
+        if self.is_barrier(self.current):
+            return 0
+
+        deleted_node = self.current
+        value = deleted_node.data
+
+        prev_element = deleted_node.prev
+        next_element = deleted_node.next
+
+        prev_element.next = next_element
+        next_element.prev = prev_element
+
+        if next_element != self.barrier:
+            self.current = next_element
+        else:
+            self.current = prev_element
+
+        deleted_node.dispose()
+        return value
+
+    def put(self) -> None:
+        # Добавлен метод put — процедура Put из задания
+        # Выводит ссылку на текущий элемент
+        print(f"current: {self.current}")
+
+    def display(self) -> None:
+        """Выводит список на экран, исключая барьерный элемент"""
+        # Имя current заменено на node — не путать с self.current
+        node = self.barrier.next
+        while node != self.barrier:
+            if node == self.current:
+                print(f"[{node.data}]", end=" <-> ")
+            else:
+                print(node.data, end=" <-> ")
+            node = node.next
+        print("(barrier)")
+
+
+def main() -> None:
+    # Исполняемый код вынесен в функцию main
+    # Имя L заменено на linked_list — однобуквенные имена запрещены
+    linked_list = IntListB()
+
+    n = int(input("Введите количество элементов списка: "))
+    for i in range(n):
+        data = int(input(f"Введите элемент {i + 1}: "))
+        linked_list.insert_last(data)
+
+    print("\nИсходный список:")
+    linked_list.display()
+
+    deleted_values = []
+    for _ in range(DELETE_COUNT):
+        if linked_list.is_barrier(linked_list.current):
+            break
+        deleted_values.append(linked_list.delete_current())
+
+    print("\nУдаленные элементы:", deleted_values)
+    print("\nСписок после удаления:")
+    linked_list.display()
+
+    linked_list.put()
+
+
+if __name__ == '__main__':
+    main()
