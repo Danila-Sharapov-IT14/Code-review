@@ -1,0 +1,43 @@
+# высота в генеалогическом дереве
+
+N = int(input("Введите количество человек: "))
+
+parent = {}
+for i in range(N-1):
+    line = input(str(i+1) + " пара: ").split()
+    child = line[0]
+    par = line[1]
+    parent[child] = par
+
+# найдём корень
+root = None
+for p in parent.values():
+    if p not in parent:
+        root = p
+        break
+
+# если только один человек
+if N == 1:
+    root = None
+
+height = {}
+
+def calc(name):
+    if name in height:
+        return height[name]
+    if name not in parent:
+        height[name] = 0
+        return 0
+    h = calc(parent[name]) + 1
+    height[name] = h
+    return h
+
+# считаем высоты
+if root:
+    calc(root)
+for name in parent:
+    calc(name)
+
+print('"Высота" каждого члена семьи:')
+for name in sorted(height):
+    print(name + " " + str(height[name]))
