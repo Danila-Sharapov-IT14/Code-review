@@ -1,0 +1,132 @@
+# Победитель — Решение №3 (Claude).
+
+# Аргументация:
+# Документация — единственное решение с docstring, что требуется заданием
+# Константы — OPERATION_CODES и SUBTRACTION_CODE вынесены, магические числа не разбросаны по коду
+# Читаемость — is_leaf() делает код самодокументируемым
+# Корректность — логика та же, что у DeepSeek, но оформлена лучше
+# Стиль — соответствует PEP 8
+# Решение GPT тоже хорошее (ООП, красивый вывод), но нет docstring. Решение DeepSeek — самое компактное, но документации нет вовсе.
+
+# Константы вынесены в верхний регистр — сигнализируют о неизменяемости
+OPERATION_CODES = {
+    '+': -1,
+    '-': -2,
+    '*': -3,
+}
+
+SUBTRACTION_CODE = -2
+
+
+class Node:
+    """Узел дерева выражения"""
+
+    def __init__(self, data: int,
+                 left: 'Node | None' = None,
+                 right: 'Node | None' = None) -> None:
+        """
+        :param data: значение узла (операнд >= 0, операция < 0)
+        :param left: левое поддерево
+        :param right: правое поддерево
+        """
+        self.data = data
+        self.left = left
+        self.right = right
+
+    def is_leaf(self) -> bool:
+        """
+        Проверяет, является ли узел листом (операндом)
+
+        :return: True, если узел — операнд
+        """
+        return self.data >= 0
+
+    def __str__(self) -> str:
+        """Строковое представление узла"""
+        return f"Node({self.data})"
+
+
+def build_tree(tokens: list[str]) -> Node:
+    """
+    Строит дерево выражения из списка токенов в обратной польской записи
+
+    :param tokens: список токенов (числа и знаки операций)
+    :return: корень построенного дерева
+    """
+    stack: list[Node] = []
+    for token in tokens:
+        if token in OPERATION_CODES:
+            right = stack.pop()
+            left = stack.pop()
+            node = Node(OPERATION_CODES[token], left, right)
+            stack.append(node)
+        else:
+            stack.append(Node(int(token)))
+    return stack[0]
+
+
+def evaluate(node: 'Node | None') -> int:
+    """
+    Вычисляет значение поддерева
+
+    :param node: корень поддерева
+    :return: целочисленный результат вычисления
+    """
+    if node is None:
+        return 0
+    if node.is_leaf():
+        return node.data
+
+    left_value = evaluate(node.left)
+    right_value = evaluate(node.right)
+
+    if node.data == -1:
+        return left_value + right_value
+    if node.data == SUBTRACTION_CODE:
+        return left_value - right_value
+    return left_value * right_value
+
+
+def contains_subtraction(node: 'Node | None') -> bool:
+    """
+    Проверяет, содержит ли поддерево операцию вычитания
+
+    :param node: корень поддерева
+    :return: True, если вычитание есть, иначе False
+    """
+    if node is None:
+        return False
+    if node.data == SUBTRACTION_CODE:
+        return True
+    return (contains_subtraction(node.left)
+            or contains_subtraction(node.right))
+
+
+def remove_subtraction(node: 'Node | None') -> 'Node | None':
+    """
+    Заменяет поддеревья с вычитанием на их вычисленное значение
+
+    :param node: корень поддерева
+    :return: преобразованный корень
+    """
+    if node is None:
+        return None
+    if contains_subtraction(node):
+        return Node(evaluate(node))
+    node.left = remove_subtraction(node.left)
+    node.right = remove_subtraction(node.right)
+    return node
+
+
+def main() -> None:
+    """Точка входа: чтение файла, построение и преобразование дерева"""
+    with open('filename.txt', encoding='utf-8') as file:
+        tokens = file.read().split()
+
+    root = build_tree(tokens)
+    root = remove_subtraction(root)
+    print("Указатель на корень:", root)
+
+
+if __name__ == '__main__':
+    main()
