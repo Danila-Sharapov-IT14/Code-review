@@ -1,0 +1,99 @@
+# Дан односвязный линейный список и указатель на голову списка P1
+# Необходимо вставить значение M после каждого четвертого элемента списка, и
+# вывести ссылку на последний элемент полученного списка P2
+
+# Введена константа в верхнем регистре для шага вставки
+INSERT_STEP = 4
+
+
+class Node:
+    # Добавлены аннотации типов
+    def __init__(self, data: int) -> None:
+        self.data = data
+        self.next = None
+
+
+class LinkedList:
+    # Добавлены аннотации типов
+    def __init__(self) -> None:
+        self.head = None
+
+    def append(self, data: int) -> None:
+        # Добавлены аннотации типов
+        # Комментарий перенесён на отдельную строку и переформулирован
+        new_node = Node(data)
+        if not self.head:
+            self.head = new_node
+            return
+        current = self.head
+        while current.next:
+            current = current.next
+        current.next = new_node
+
+    def insert_after_every_fourth(self, value: int) -> None:
+        # Имя M заменено на value — осмысленнее для параметра
+        # Магическое число 4 заменено на константу INSERT_STEP
+        # Комментарии убраны из концов строк, перенесены отдельно
+        current = self.head
+        count = 1
+
+        while current:
+            if count == INSERT_STEP:
+                new_node = Node(value)
+                new_node.next = current.next
+                current.next = new_node
+                count = 0
+            current = current.next
+            count += 1
+
+    def get_last_element(self) -> 'Node | None':
+        # Добавлены аннотации типов
+        current = self.head
+        while current and current.next:
+            current = current.next
+        return current
+
+    def display(self) -> None:
+        # Добавлены аннотации типов
+        current = self.head
+        while current:
+            print(current.data, end=" -> ")
+            current = current.next
+        print("None")
+
+
+def input_values(n: int) -> list[int]:
+    # Ввод элементов вынесен в отдельную функцию
+    # Добавлены аннотации типов
+    values = []
+    for i in range(n):
+        data = int(input(f"Введите значение для элемента {i + 1}: "))
+        values.append(data)
+    return values
+
+
+def main() -> None:
+    # Исполняемый код вынесен в функцию main
+    # Имя ll заменено на linked_list — понятнее
+    linked_list = LinkedList()
+    n = int(input("Введите количество элементов в списке (не менее 4): "))
+    value = int(input("Введите значение M: "))
+
+    values = input_values(n)
+    for data in values:
+        linked_list.append(data)
+
+    linked_list.insert_after_every_fourth(value)
+
+    print("Содержимое списка после вставки:")
+    linked_list.display()
+
+    last_element = linked_list.get_last_element()
+    if last_element:
+        print(f"Значение последнего элемента: {last_element.data}")
+    else:
+        print("Список пуст.")
+
+
+if __name__ == '__main__':
+    main()
