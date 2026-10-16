@@ -1,0 +1,25 @@
+# тест по переводу слов
+
+f1 = open("russian.txt", "r")
+f2 = open("english.txt", "r")
+
+ru = f1.readlines()
+en = f2.readlines()
+
+f1.close()
+f2.close()
+
+correct = 0
+total = len(ru)
+
+for i in range(total):
+    word = ru[i].strip()
+    answer = input(word + ": ")
+    if answer.strip().lower() == en[i].strip().lower():
+        print("Верно")
+        correct += 1
+    else:
+        print("Неверно")
+
+mark = round(correct / total * 5)
+print("Оценка: " + str(mark))
