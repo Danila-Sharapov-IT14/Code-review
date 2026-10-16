@@ -1,0 +1,131 @@
+"""
+Тестирующая программа по таблице умножения
+
+Выводит пять вопросов, пользователь вводит ответы рядом с вопросами
+После нажатия кнопки «Проверка» программа считает количество
+правильных ответов и выделяет неправильные ответы красным цветом
+"""
+
+import tkinter as tk
+
+# Константы окна
+WINDOW_TITLE = "Тест по таблице умножения"
+WINDOW_SIZE = "400x350"
+
+# Константы теста
+QUESTIONS_COUNT = 5
+FIRST_FACTOR_BASE = 2
+SECOND_FACTOR_BASE = 3
+
+# Константы цветов
+COLOR_CORRECT = "black"
+COLOR_WRONG = "red"
+
+# Константы размеров и отступов
+ENTRY_WIDTH = 10
+RESULT_ROW = QUESTIONS_COUNT
+BUTTON_ROW = QUESTIONS_COUNT + 1
+COLUMN_SPAN = 2
+
+
+class MathTest:
+    """Тест по таблице умножения с графическим интерфейсом"""
+
+    def __init__(self, root: tk.Tk) -> None:
+        """
+        :param root: главное окно приложения
+        """
+        self.root = root
+        self.root.title(WINDOW_TITLE)
+        self.root.geometry(WINDOW_SIZE)
+
+        self.questions = self._build_questions()
+        self.entries: list[tk.Entry] = []
+        self.result_label: tk.Label | None = None
+
+        self._build_widgets()
+
+    def _build_questions(self) -> list[tuple[int, int]]:
+        """
+        Формирует список вопросов
+
+        :return: список пар сомножителей
+        """
+        return [
+            (i + FIRST_FACTOR_BASE, i + SECOND_FACTOR_BASE)
+            for i in range(QUESTIONS_COUNT)
+        ]
+
+    def _build_widgets(self) -> None:
+        """Создаёт элементы интерфейса: вопросы, поля ввода, кнопку"""
+        for index, (a, b) in enumerate(self.questions):
+            label = tk.Label(self.root, text=f"{a} * {b} =")
+            label.grid(row=index, column=0)
+
+            entry = tk.Entry(self.root, width=ENTRY_WIDTH)
+            entry.grid(row=index, column=1)
+            self.entries.append(entry)
+
+        button = tk.Button(
+            self.root, text="Проверка", command=self.check_answers
+        )
+        button.grid(
+            row=BUTTON_ROW, column=0, columnspan=COLUMN_SPAN
+        )
+
+    def _is_correct(self, index: int) -> bool:
+        """
+        Проверяет правильность ответа в поле с указанным индексом
+
+        :param index: индекс вопроса
+        :return: True, если ответ верный
+        """
+        a, b = self.questions[index]
+        raw_value = self.entries[index].get().strip()
+
+        if not raw_value:
+            return False
+
+        try:
+            return int(raw_value) == a * b
+        except ValueError:
+            return False
+
+    def check_answers(self) -> None:
+        """Проверяет ответы, красит поля и выводит результат"""
+        correct_count = 0
+
+        for index in range(len(self.questions)):
+            if self._is_correct(index):
+                correct_count += 1
+                self.entries[index].config(fg=COLOR_CORRECT)
+            else:
+                self.entries[index].config(fg=COLOR_WRONG)
+
+        self._update_result(correct_count)
+
+    def _update_result(self, correct_count: int) -> None:
+        """
+        Обновляет метку с количеством правильных ответов
+
+        :param correct_count: число правильных ответов
+        """
+        if self.result_label is not None:
+            self.result_label.destroy()
+
+        text = f"Правильных ответов: {correct_count}"
+        self.result_label = tk.Label(self.root, text=text)
+        self.result_label.grid(
+            row=RESULT_ROW, column=0, columnspan=COLUMN_SPAN
+        )
+
+
+def main() -> None:
+    """Точка входа: создаёт окно и запускает приложение"""
+    root = tk.Tk()
+    MathTest(root)
+    root.mainloop()
+
+
+if __name__ == '__main__':
+    main()
